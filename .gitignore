@@ -1,0 +1,23 @@
+# Brand source files (private)
+assets/
+
+# Dependencies
+node_modules/
+
+# Build output
+web/dist/
+web/.astro/
+studio/dist/
+studio/.sanity/
+
+# Local env and secrets
+.env
+.env.*
+!.env.example
+.dev.vars
+.wrangler/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
