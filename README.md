@@ -42,6 +42,17 @@ npm install <package> -w web
 npm install <package> -w studio
 ```
 
+## Quality checks
+
+```sh
+npm run format   # Prettier (with prettier-plugin-astro), whole repo
+npm run check    # format check + ESLint + type checks (astro check, tsc, Sanity schema)
+```
+
+- ESLint: `web/` uses typescript-eslint, eslint-plugin-astro and its accessibility rules (eslint-plugin-jsx-a11y-x); `studio/` uses Sanity's preset.
+- CI runs `check` and builds both packages on pull requests and pushes to `main`.
+- Dependabot opens one grouped PR a week for minor/patch npm updates, and monthly for GitHub Actions.
+
 ## Deployment
 
 - **Site:** a Cloudflare Worker (`simon-alla`) serving the static pages, plus the `/api/contact` route. Config: [`web/wrangler.jsonc`](web/wrangler.jsonc). Deployed by GitHub Actions ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)):
