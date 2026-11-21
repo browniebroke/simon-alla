@@ -15,7 +15,9 @@ An npm workspaces monorepo:
 | [`docs/`](docs) | Plan and project docs | — |
 | `assets/` | Brand source files (flyer, business card, logo); git-ignored | — |
 
-Both packages are empty stubs for now; they get scaffolded in phase 1 of the plan.
+Both packages are freshly scaffolded starters: a minimal Astro site and a blank Sanity Studio (French UI), with no schemas yet.
+
+Sanity project: `md9oxzrq`, dataset `production` (public). Manage it at <https://www.sanity.io/manage/project/md9oxzrq>.
 
 ## Requirements
 
