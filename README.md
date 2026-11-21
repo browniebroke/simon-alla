@@ -10,12 +10,12 @@ An npm workspaces monorepo:
 
 | Folder | What | Deployed to |
 | --- | --- | --- |
-| [`web/`](web) | Astro site (`@simon-alla/web`) | Cloudflare Pages |
+| [`web/`](web) | Astro site (`@simon-alla/web`) | Cloudflare Workers |
 | [`studio/`](studio) | Sanity Studio (`@simon-alla/studio`) | `*.sanity.studio` |
 | [`docs/`](docs) | Plan and project docs | — |
 | `assets/` | Brand source files (flyer, business card, logo); git-ignored | — |
 
-Both packages are freshly scaffolded starters: a minimal Astro site and a blank Sanity Studio (French UI), with no schemas yet.
+The site is static: pages are built from Sanity content at build time. The only server code is the contact form endpoint (`web/src/pages/api/contact.ts`). Seed content from the flyer: `npm run seed -w studio`.
 
 Sanity project: `md9oxzrq`, dataset `production` (public). Manage it at <https://www.sanity.io/manage/project/md9oxzrq>.
 
@@ -28,6 +28,7 @@ Sanity project: `md9oxzrq`, dataset `production` (public). Manage it at <https:/
 
 ```sh
 npm install          # installs dependencies for every workspace
+cp web/.dev.vars.example web/.dev.vars   # local secrets: Turnstile test key, email dry run
 npm run dev:web      # Astro dev server
 npm run dev:studio   # Sanity Studio dev server
 ```
@@ -41,5 +42,10 @@ npm install <package> -w studio
 
 ## Deployment
 
-- **Site:** Cloudflare Pages builds from the repo root with `npm run build:web`, output directory `web/dist`. Publishing in Sanity triggers a rebuild through a deploy hook.
+- **Site:** a Cloudflare Worker (`simon-alla`) serving the static pages, plus the `/api/contact` route. Workers Builds deploys on every push to `main`; publishing in Sanity triggers a rebuild through a deploy hook. Config: [`web/wrangler.jsonc`](web/wrangler.jsonc).
+- **Contact form settings:**
+  - `CONTACT_FROM_EMAIL` in `wrangler.jsonc`: sender address, on a domain onboarded with `npx wrangler email sending enable <domain>`.
+  - `TURNSTILE_SECRET_KEY`: secret, set with `npx wrangler secret put TURNSTILE_SECRET_KEY` (from `web/`).
+  - `PUBLIC_TURNSTILE_SITE_KEY`: build variable in Workers Builds (defaults to Cloudflare's test key).
+  - The recipient is the email set on the Contact page in Sanity, or the site email.
 - **Studio:** `npm run deploy:studio` (runs `sanity deploy`).

@@ -43,6 +43,7 @@ const shareImageUrl = shareImage && imageUrl(shareImage, 1200, 630)
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://cdn.sanity.io" />
     <meta name="generator" content={Astro.generator} />
+    <slot name="head" />
   </head>
   <body>
     <a class="visually-hidden skip-link" href="#contenu">Aller au contenu</a>

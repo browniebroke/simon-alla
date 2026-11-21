@@ -6,12 +6,15 @@
     "node": ">=22.23.4"
   },
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "dev": "wrangler types && astro dev",
+    "build": "wrangler types && astro check && astro build",
+    "preview": "wrangler types && astro preview",
+    "astro": "astro",
+    "deploy": "npm run build && wrangler deploy",
+    "types": "wrangler types"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^14.4.9",
     "@fontsource-variable/jost": "^5.3.0",
     "@fontsource/playfair-display": "^5.3.0",
     "@portabletext/to-html": "^6.0.0",
@@ -23,6 +26,7 @@
   "private": true,
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wrangler": "^4.166.0"
   }
 }
