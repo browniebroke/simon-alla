@@ -8,7 +8,10 @@ import {getProjects, getSettings} from '../../lib/sanity'
 const [settings, projects] = await Promise.all([getSettings(), getProjects()])
 ---
 
-<BaseLayout title="Réalisations" description={`Quelques réalisations de ${settings.name} : ${settings.tagline ?? ''}.`}>
+<BaseLayout
+  title="Réalisations"
+  description={`Quelques réalisations de ${settings.name} : ${settings.tagline ?? ''}.`}
+>
   <PageHeader title="Réalisations" lead="Quelques chantiers récents, en images." />
   <section class="container list">
     <ProjectGrid projects={projects} />

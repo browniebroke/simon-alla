@@ -6,11 +6,11 @@ Website for Simon Alla's stone and landscaping business. The site is in French: 
 
 An npm workspaces monorepo:
 
-| Folder | What | Deployed to |
-| --- | --- | --- |
-| [`web/`](web) | Astro site (`@simon-alla/web`) | Cloudflare Workers |
-| [`studio/`](studio) | Sanity Studio (`@simon-alla/studio`) | `*.sanity.studio` |
-| `assets/` | Brand source files (flyer, business card, logo); git-ignored | — |
+| Folder              | What                                                         | Deployed to        |
+| ------------------- | ------------------------------------------------------------ | ------------------ |
+| [`web/`](web)       | Astro site (`@simon-alla/web`)                               | Cloudflare Workers |
+| [`studio/`](studio) | Sanity Studio (`@simon-alla/studio`)                         | `*.sanity.studio`  |
+| `assets/`           | Brand source files (flyer, business card, logo); git-ignored | —                  |
 
 The site is static: pages are built from Sanity content at build time. The only server code is the contact form endpoint (`web/src/pages/api/contact.ts`). Seed content from the flyer: `npm run seed -w studio`.
 
@@ -88,15 +88,15 @@ One-off steps done outside the repo. Tick them off as they're done.
 
 In sanity.io/manage → project → API → Webhooks → Create:
 
-| Setting | Value |
-| --- | --- |
-| URL | `https://api.github.com/repos/browniebroke/simon-alla/actions/workflows/deploy.yml/dispatches` |
-| Dataset | `production` |
-| Trigger on | Create, Update, Delete |
-| Filter | *(empty: every published document)* |
-| Projection | `{"ref": "main"}` |
-| HTTP method | `POST` |
-| HTTP headers | `Authorization: Bearer <token>` and `Accept: application/vnd.github+json` |
+| Setting      | Value                                                                                          |
+| ------------ | ---------------------------------------------------------------------------------------------- |
+| URL          | `https://api.github.com/repos/browniebroke/simon-alla/actions/workflows/deploy.yml/dispatches` |
+| Dataset      | `production`                                                                                   |
+| Trigger on   | Create, Update, Delete                                                                         |
+| Filter       | _(empty: every published document)_                                                            |
+| Projection   | `{"ref": "main"}`                                                                              |
+| HTTP method  | `POST`                                                                                         |
+| HTTP headers | `Authorization: Bearer <token>` and `Accept: application/vnd.github+json`                      |
 
 The token is a GitHub fine-grained personal access token limited to this repository, with **Actions: read and write** only. It can start workflows but not change code. Keep it only in the webhook settings, and note its expiry date: the webhook stops working when it expires. GitHub answers `204 No Content` when the call works; the webhook's attempt log in Sanity shows failures.
 

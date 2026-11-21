@@ -9,19 +9,17 @@ interface Props {
 const {projects, empty = 'Les premières réalisations seront bientôt en ligne.'} = Astro.props
 ---
 
-{
-  projects.length > 0 ? (
-    <ul class="grid">
-      {projects.map((p) => (
-        <li>
-          <ProjectCard project={p} />
-        </li>
-      ))}
-    </ul>
-  ) : (
-    <p class="empty">{empty}</p>
-  )
-}
+{projects.length > 0 ? (
+  <ul class="grid">
+    {projects.map((p) => (
+      <li>
+        <ProjectCard project={p} />
+      </li>
+    ))}
+  </ul>
+) : (
+  <p class="empty">{empty}</p>
+)}
 
 <style>
   .grid {

@@ -15,7 +15,10 @@ export const POST: APIRoute = async ({request}) => {
   const reply = (result: Result, status = 200) =>
     wantsJson
       ? Response.json(result, {status})
-      : Response.redirect(new URL(result.ok ? '/contact/merci/' : '/contact/?erreur=1#formulaire', request.url), 303)
+      : Response.redirect(
+          new URL(result.ok ? '/contact/merci/' : '/contact/?erreur=1#formulaire', request.url),
+          303,
+        )
 
   let form: FormData
   try {
@@ -29,7 +32,10 @@ export const POST: APIRoute = async ({request}) => {
 
   const validation = validateContact(form)
   if (!validation.ok) {
-    return reply({ok: false, error: 'Merci de corriger les champs indiqués.', fields: validation.errors}, 422)
+    return reply(
+      {ok: false, error: 'Merci de corriger les champs indiqués.', fields: validation.errors},
+      422,
+    )
   }
 
   const human = await verifyTurnstile(
@@ -37,7 +43,10 @@ export const POST: APIRoute = async ({request}) => {
     request.headers.get('cf-connecting-ip'),
   )
   if (!human) {
-    return reply({ok: false, error: 'La vérification anti-robot a échoué. Rechargez la page et réessayez.'}, 403)
+    return reply(
+      {ok: false, error: 'La vérification anti-robot a échoué. Rechargez la page et réessayez.'},
+      403,
+    )
   }
 
   const {subject, text, html} = formatEmail(validation.data)
@@ -51,7 +60,14 @@ export const POST: APIRoute = async ({request}) => {
   const to = await getRecipient()
   if (!from || !to) {
     console.error('[contact] CONTACT_FROM_EMAIL or recipient email is not configured')
-    return reply({ok: false, error: 'Le formulaire est momentanément indisponible. Appelez-moi ou écrivez-moi directement.'}, 503)
+    return reply(
+      {
+        ok: false,
+        error:
+          'Le formulaire est momentanément indisponible. Appelez-moi ou écrivez-moi directement.',
+      },
+      503,
+    )
   }
 
   try {
@@ -65,7 +81,10 @@ export const POST: APIRoute = async ({request}) => {
     })
   } catch (error) {
     console.error('[contact] sending failed', error)
-    return reply({ok: false, error: 'L’envoi a échoué. Réessayez, ou appelez-moi directement.'}, 502)
+    return reply(
+      {ok: false, error: 'L’envoi a échoué. Réessayez, ou appelez-moi directement.'},
+      502,
+    )
   }
 
   return reply({ok: true})

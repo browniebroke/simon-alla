@@ -12,12 +12,16 @@ const year = new Date().getFullYear()
 <footer class="footer">
   <svg class="hills" viewBox="0 0 1440 140" preserveAspectRatio="none" aria-hidden="true">
     <path d="M0 140V70C260 10 520 0 760 40S1180 110 1440 60V140Z" style="fill:var(--olive)"></path>
-    <path d="M0 140V105C300 60 620 70 900 98S1260 120 1440 96V140Z" style="fill:var(--forest)"></path>
+    <path
+      d="M0 140V105C300 60 620 70 900 98S1260 120 1440 96V140Z"
+      style="fill:var(--forest)"
+    ></path>
   </svg>
   <svg class="grass" viewBox="0 0 120 70" aria-hidden="true">
     <path
       d="M4 70C10 48 14 34 12 18 22 34 24 50 22 70ZM20 70C30 44 40 26 56 10 46 30 40 50 40 70ZM36 70C42 50 52 36 66 28 58 44 54 58 54 70ZM50 70C54 46 56 26 52 4 64 26 66 50 64 70ZM62 70C70 52 82 38 100 30 86 46 80 58 80 70ZM76 70C84 56 98 46 116 44 102 54 96 62 94 70Z"
-      style="fill:var(--forest)"></path>
+      style="fill:var(--forest)"
+    ></path>
   </svg>
   <div class="body">
     <div class="container">
@@ -28,25 +32,22 @@ const year = new Date().getFullYear()
       </p>
       {settings.serviceArea && <p class="area">{settings.serviceArea}</p>}
       <p class="legal">
-        © {year} {settings.name}{settings.tagline && ` · ${settings.tagline}`}
-        {
-          settings.pages.map((p) => (
-            <>
-              {' · '}
-              <a href={`/${p.slug}/`}>{p.title}</a>
-            </>
-          ))
-        }
-        {
-          settings.socialLinks?.map((s) => (
-            <>
-              {' · '}
-              <a href={s.url} rel="noopener noreferrer">
-                {s.label}
-              </a>
-            </>
-          ))
-        }
+        © {year} {settings.name}
+        {settings.tagline && ` · ${settings.tagline}`}
+        {settings.pages.map((p) => (
+          <>
+            {' · '}
+            <a href={`/${p.slug}/`}>{p.title}</a>
+          </>
+        ))}
+        {settings.socialLinks?.map((s) => (
+          <>
+            {' · '}
+            <a href={s.url} rel="noopener noreferrer">
+              {s.label}
+            </a>
+          </>
+        ))}
       </p>
     </div>
   </div>

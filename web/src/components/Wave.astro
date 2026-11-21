@@ -15,7 +15,9 @@ const {above, below, accent, flip = false} = Astro.props
 
 <div class="wave" class:list={{flip}} style={`background:${below}`} aria-hidden="true">
   <svg viewBox="0 0 1440 96" preserveAspectRatio="none">
-    {accent && <path d="M0 0H1440V58C1180 102 930 96 700 66S250 30 0 78Z" style={`fill:${accent}`} />}
+    {accent && (
+      <path d="M0 0H1440V58C1180 102 930 96 700 66S250 30 0 78Z" style={`fill:${accent}`} />
+    )}
     <path d="M0 0H1440V40C1180 84 930 78 700 48S250 12 0 60Z" style={`fill:${above}`} />
   </svg>
 </div>

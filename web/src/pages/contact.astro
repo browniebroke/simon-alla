@@ -6,7 +6,11 @@ import {telHref} from '../lib/format'
 import {renderRichText} from '../lib/portableText'
 import {getContactPage, getServices, getSettings} from '../lib/sanity'
 
-const [settings, page, services] = await Promise.all([getSettings(), getContactPage(), getServices()])
+const [settings, page, services] = await Promise.all([
+  getSettings(),
+  getContactPage(),
+  getServices(),
+])
 const privacy = settings.pages.find((p) => p.slug === 'confidentialite')
 ---
 
@@ -28,26 +32,29 @@ const privacy = settings.pages.find((p) => p.slug === 'confidentialite')
         <span class="value">{settings.email}</span>
       </a>
     </div>
-    {
-      (settings.serviceArea || settings.towns?.length || settings.availability) && (
-        <div class="details">
-          {settings.serviceArea && (
-            <div>
-              <h2>Zone d’intervention</h2>
-              <p>{settings.serviceArea}</p>
-              {settings.towns && settings.towns.length > 0 && <p class="towns">{settings.towns.join(' · ')}</p>}
-            </div>
-          )}
-          {settings.availability && (
-            <div>
-              <h2>Disponibilités</h2>
-              <p>{settings.availability}</p>
-            </div>
-          )}
-        </div>
-      )
-    }
-    <ContactForm services={services.map((s) => s.title)} privacyHref={privacy && `/${privacy.slug}/`} />
+    {(settings.serviceArea || settings.towns?.length || settings.availability) && (
+      <div class="details">
+        {settings.serviceArea && (
+          <div>
+            <h2>Zone d’intervention</h2>
+            <p>{settings.serviceArea}</p>
+            {settings.towns && settings.towns.length > 0 && (
+              <p class="towns">{settings.towns.join(' · ')}</p>
+            )}
+          </div>
+        )}
+        {settings.availability && (
+          <div>
+            <h2>Disponibilités</h2>
+            <p>{settings.availability}</p>
+          </div>
+        )}
+      </div>
+    )}
+    <ContactForm
+      services={services.map((s) => s.title)}
+      privacyHref={privacy && `/${privacy.slug}/`}
+    />
   </section>
 </BaseLayout>
 

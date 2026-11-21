@@ -24,11 +24,17 @@ const background = hasImage(home.heroBackground)
   <section class="hero" class:list={{'has-bg': background}} style={background}>
     <div class="container hero-inner">
       <div class="hero-text">
-        <h1>{first} <span>{last}</span></h1>
+        <h1>
+          {first} <span>{last}</span>
+        </h1>
         {subtitle && <p class="tagline">{subtitle}</p>}
         <div class="actions">
-          <a class="button button--yellow" href="/contact/">{home.cta?.buttonLabel ?? 'Me contacter'}</a>
-          <a class="button button--outline" href={telHref(settings.phone)}>{settings.phone}</a>
+          <a class="button button--yellow" href="/contact/">
+            {home.cta?.buttonLabel ?? 'Me contacter'}
+          </a>
+          <a class="button button--outline" href={telHref(settings.phone)}>
+            {settings.phone}
+          </a>
         </div>
       </div>
       {heroPhoto && <RingedPhoto photo={heroPhoto} />}
@@ -37,29 +43,25 @@ const background = hasImage(home.heroBackground)
   </section>
   <Wave above="var(--forest)" below="var(--paper)" accent="var(--yellow)" />
 
-  {
-    home.intro && (
-      <section class="intro" id="presentation">
-        <div class="blob blob--left" aria-hidden="true" />
-        <div class="container intro-inner">
-          <div class="prose intro-text" set:html={renderRichText(home.intro)} />
-        </div>
-      </section>
-    )
-  }
+  {home.intro && (
+    <section class="intro" id="presentation">
+      <div class="blob blob--left" aria-hidden="true" />
+      <div class="container intro-inner">
+        <div class="prose intro-text" set:html={renderRichText(home.intro)} />
+      </div>
+    </section>
+  )}
 
   <section class="services" id="services">
     <div class="blob blob--right" aria-hidden="true"></div>
     <div class="container">
       <h2 class="section-title">{home.servicesTitle ?? 'Les services'}</h2>
       <ul class="service-grid">
-        {
-          home.services.map((s, i) => (
-            <li>
-              <ServiceCard service={s} index={i} />
-            </li>
-          ))
-        }
+        {home.services.map((s, i) => (
+          <li>
+            <ServiceCard service={s} index={i} />
+          </li>
+        ))}
       </ul>
     </div>
   </section>
@@ -82,8 +84,7 @@ const background = hasImage(home.heroBackground)
   .hero {
     background:
       radial-gradient(ellipse at 15% 20%, rgb(141 162 80 / 18%), transparent 55%),
-      radial-gradient(ellipse at 85% 90%, rgb(0 0 0 / 30%), transparent 60%),
-      var(--forest);
+      radial-gradient(ellipse at 85% 90%, rgb(0 0 0 / 30%), transparent 60%), var(--forest);
     color: var(--white);
     padding-block: clamp(40px, 7vw, 96px) clamp(24px, 4vw, 48px);
   }

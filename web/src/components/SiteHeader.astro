@@ -23,18 +23,18 @@ const current = Astro.url.pathname
     </a>
     <nav aria-label="Navigation principale">
       <ul>
-        {
-          links.map((l) => (
-            <li>
-              <a href={l.href} aria-current={current.startsWith(l.href) ? 'page' : undefined}>
-                {l.label}
-              </a>
-            </li>
-          ))
-        }
+        {links.map((l) => (
+          <li>
+            <a href={l.href} aria-current={current.startsWith(l.href) ? 'page' : undefined}>
+              {l.label}
+            </a>
+          </li>
+        ))}
       </ul>
     </nav>
-    <a class="button button--yellow phone" href={telHref(settings.phone)}>{settings.phone}</a>
+    <a class="button button--yellow phone" href={telHref(settings.phone)}>
+      {settings.phone}
+    </a>
   </div>
 </header>
 

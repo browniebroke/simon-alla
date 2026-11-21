@@ -38,7 +38,8 @@ export function validateContact(form: FormData): ValidationResult {
   const errors: Partial<Record<keyof ContactMessage, string>> = {}
   if (!data.name) errors.name = 'Indiquez votre nom.'
   if (data.message.length < 10) errors.message = 'Décrivez votre demande en quelques mots.'
-  if (!data.email && !data.phone) errors.email = 'Indiquez un e-mail ou un téléphone pour vous répondre.'
+  if (!data.email && !data.phone)
+    errors.email = 'Indiquez un e-mail ou un téléphone pour vous répondre.'
   if (data.email && !EMAIL.test(data.email)) errors.email = 'Adresse e-mail invalide.'
   if (data.phone && !PHONE.test(data.phone)) errors.phone = 'Numéro de téléphone invalide.'
 
@@ -46,7 +47,10 @@ export function validateContact(form: FormData): ValidationResult {
 }
 
 const escape = (s: string) =>
-  s.replace(/[&<>"']/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c]!)
+  s.replace(
+    /[&<>"']/g,
+    (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c]!,
+  )
 
 export function formatEmail(m: ContactMessage) {
   const rows: [string, string][] = [

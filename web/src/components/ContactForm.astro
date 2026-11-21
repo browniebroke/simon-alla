@@ -13,7 +13,9 @@ const {services, privacyHref} = Astro.props
 
   <div class="grid">
     <label>
-      <span>Nom <abbr title="obligatoire">*</abbr></span>
+      <span>
+        Nom <abbr title="obligatoire">*</abbr>
+      </span>
       <input name="name" autocomplete="name" required maxlength="100" />
       <small class="error" data-for="name"></small>
     </label>
@@ -35,12 +37,16 @@ const {services, privacyHref} = Astro.props
       <span>Type de projet</span>
       <select name="projectType">
         <option value="">Choisir…</option>
-        {services.map((s) => <option>{s}</option>)}
+        {services.map((s) => (
+          <option>{s}</option>
+        ))}
         <option>Autre</option>
       </select>
     </label>
     <label class="wide">
-      <span>Votre message <abbr title="obligatoire">*</abbr></span>
+      <span>
+        Votre message <abbr title="obligatoire">*</abbr>
+      </span>
       <textarea name="message" rows="6" required maxlength="5000"></textarea>
       <small class="error" data-for="message"></small>
     </label>
@@ -55,7 +61,9 @@ const {services, privacyHref} = Astro.props
 
   <div class="cf-turnstile" data-sitekey={PUBLIC_TURNSTILE_SITE_KEY} data-language="fr"></div>
 
-  <button class="button button--yellow" type="submit">Envoyer le message</button>
+  <button class="button button--yellow" type="submit">
+    Envoyer le message
+  </button>
 
   <p class="privacy">
     Vos coordonnées servent uniquement à répondre à votre demande.
@@ -100,7 +108,11 @@ const {services, privacyHref} = Astro.props
         body: new FormData(form),
         headers: {Accept: 'application/json'},
       })
-      const result = (await res.json()) as {ok: boolean; error?: string; fields?: Record<string, string>}
+      const result = (await res.json()) as {
+        ok: boolean
+        error?: string
+        fields?: Record<string, string>
+      }
       if (result.ok) {
         location.assign('/contact/merci/')
         return

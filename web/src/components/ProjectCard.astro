@@ -23,7 +23,9 @@ const meta = [project.town, monthYear(project.date)].filter(Boolean).join(' · '
   />
   <div class="body">
     {project.service && <p class="service">{project.service.title}</p>}
-    <h3><a href={`/realisations/${project.slug}/`}>{project.title}</a></h3>
+    <h3>
+      <a href={`/realisations/${project.slug}/`}>{project.title}</a>
+    </h3>
     <p class="meta">{meta}</p>
   </div>
 </article>

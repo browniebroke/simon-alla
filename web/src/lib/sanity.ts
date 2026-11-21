@@ -170,7 +170,9 @@ export function getProjects(): Promise<ProjectSummary[]> {
 }
 
 export function getProjectsFull(): Promise<Project[]> {
-  return client.fetch(`${projectsByDate}{${projectSummary}, gallery, beforeAfter, description, seo}`)
+  return client.fetch(
+    `${projectsByDate}{${projectSummary}, gallery, beforeAfter, description, seo}`,
+  )
 }
 
 export async function getContactPage(): Promise<ContactPage> {
@@ -179,5 +181,7 @@ export async function getContactPage(): Promise<ContactPage> {
 }
 
 export function getSimplePages(): Promise<SimplePage[]> {
-  return client.fetch(`*[_type == "page" && defined(slug.current)]{title, "slug": slug.current, body, seo}`)
+  return client.fetch(
+    `*[_type == "page" && defined(slug.current)]{title, "slug": slug.current, body, seo}`,
+  )
 }

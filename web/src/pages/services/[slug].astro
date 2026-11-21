@@ -25,37 +25,35 @@ const cover = hasImage(service.coverImage) ? service.coverImage : undefined
     kickerHref="/services/"
   />
   <article class="container content">
-    {
-      cover && (
-        <img
-          class="cover"
-          src={imageUrl(cover, 1100, 620)}
-          srcset={srcSet(cover, [600, 900, 1100, 1600], 620 / 1100)}
-          sizes="(max-width: 1120px) 100vw, 1056px"
-          alt={cover.alt ?? ''}
-          width="1100"
-          height="620"
-        />
-      )
-    }
+    {cover && (
+      <img
+        class="cover"
+        src={imageUrl(cover, 1100, 620)}
+        srcset={srcSet(cover, [600, 900, 1100, 1600], 620 / 1100)}
+        sizes="(max-width: 1120px) 100vw, 1056px"
+        alt={cover.alt ?? ''}
+        width="1100"
+        height="620"
+      />
+    )}
     {service.body && <div class="prose body" set:html={renderRichText(service.body)} />}
-    {
-      service.gallery && service.gallery.length > 0 && (
-        <section>
-          <h2 class="section-title">Photos</h2>
-          <Gallery photos={service.gallery} />
-        </section>
-      )
-    }
-    {
-      service.projects.length > 0 && (
-        <section>
-          <h2 class="section-title">Réalisations</h2>
-          <ProjectGrid projects={service.projects} />
-        </section>
-      )
-    }
-    <p><a class="back" href="/services/">← Tous les services</a></p>
+    {service.gallery && service.gallery.length > 0 && (
+      <section>
+        <h2 class="section-title">Photos</h2>
+        <Gallery photos={service.gallery} />
+      </section>
+    )}
+    {service.projects.length > 0 && (
+      <section>
+        <h2 class="section-title">Réalisations</h2>
+        <ProjectGrid projects={service.projects} />
+      </section>
+    )}
+    <p>
+      <a class="back" href="/services/">
+        ← Tous les services
+      </a>
+    </p>
   </article>
   <ContactBox />
 </BaseLayout>

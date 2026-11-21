@@ -15,13 +15,11 @@ const [settings, services] = await Promise.all([getSettings(), getServices()])
   <PageHeader title="Les services" lead={settings.tagline} />
   <section class="container list">
     <ul>
-      {
-        services.map((s, i) => (
-          <li>
-            <ServiceCard service={s} index={i} showImage />
-          </li>
-        ))
-      }
+      {services.map((s, i) => (
+        <li>
+          <ServiceCard service={s} index={i} showImage />
+        </li>
+      ))}
     </ul>
   </section>
   <ContactBox />
