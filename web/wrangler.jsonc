@@ -25,6 +25,8 @@
     "CONTACT_FROM_NAME": "Site L’atelier Pierre & Paysage",
     // "true" logs contact emails instead of sending them (set in .dev.vars for local dev).
     "EMAIL_DRY_RUN": "false",
+    // Hostnames the Turnstile token may come from (checked against siteverify's answer).
+    "TURNSTILE_HOSTNAMES": "simonalla.fr,simon-alla.bruno-alla-s-account.workers.dev",
   },
   // Secrets: set with `npx wrangler secret put <NAME>`, never committed.
   // Declared here so `wrangler types` doesn't depend on a local .dev.vars.

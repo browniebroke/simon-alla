@@ -59,7 +59,12 @@ const {services, privacyHref} = Astro.props
 
   <p class="hint">Indiquez au moins un e-mail ou un téléphone pour que je puisse vous répondre.</p>
 
-  <div class="cf-turnstile" data-sitekey={PUBLIC_TURNSTILE_SITE_KEY} data-language="fr"></div>
+  <div
+    class="cf-turnstile"
+    data-sitekey={PUBLIC_TURNSTILE_SITE_KEY}
+    data-action="contact"
+    data-language="fr"
+  ></div>
 
   <button class="button button--yellow" type="submit">
     Envoyer le message

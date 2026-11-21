@@ -90,20 +90,55 @@ export const POST: APIRoute = async ({request}) => {
   return reply({ok: true})
 }
 
+/** Must match `data-action` on the widget in ContactForm.astro. */
+const TURNSTILE_ACTION = 'contact'
+
+interface SiteverifyResult {
+  success: boolean
+  action?: string
+  hostname?: string
+  metadata?: {result_with_testing_key?: boolean}
+}
+
+/**
+ * Server-side Turnstile check: the token must be valid, issued for this form (action)
+ * and on one of our hostnames (TURNSTILE_HOSTNAMES). Fails closed on any error.
+ */
 async function verifyTurnstile(token: string, ip: string | null): Promise<boolean> {
-  if (!token || !env.TURNSTILE_SECRET_KEY) return false
-  const body = new FormData()
-  body.append('secret', env.TURNSTILE_SECRET_KEY)
-  body.append('response', token)
-  if (ip) body.append('remoteip', ip)
+  const hostnames = new Set(
+    String(env.TURNSTILE_HOSTNAMES ?? '')
+      .split(',')
+      .map((h) => h.trim())
+      .filter(Boolean),
+  )
+  if (!token || token.length > 2048 || !env.TURNSTILE_SECRET_KEY || hostnames.size === 0) {
+    return false
+  }
+
+  const body = new URLSearchParams({secret: env.TURNSTILE_SECRET_KEY, response: token})
+  if (ip) body.set('remoteip', ip)
+
+  let result: SiteverifyResult
   try {
-    const res = await fetch(TURNSTILE_VERIFY, {method: 'POST', body})
-    const outcome = (await res.json()) as {success: boolean}
-    return outcome.success
+    const res = await fetch(TURNSTILE_VERIFY, {
+      method: 'POST',
+      body,
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (!res.ok) throw new Error(`siteverify ${res.status}`)
+    result = (await res.json()) as SiteverifyResult
   } catch (error) {
     console.error('[contact] Turnstile verification failed', error)
     return false
   }
+
+  // Cloudflare's test keys (local dev) return no action; real secrets never set this flag.
+  const testing = result.metadata?.result_with_testing_key === true
+  return (
+    result.success === true &&
+    (testing || result.action === TURNSTILE_ACTION) &&
+    hostnames.has(result.hostname ?? '')
+  )
 }
 
 /** Address set in Sanity (Contact page), falling back to the site email. */
