@@ -82,7 +82,11 @@ One-off steps done outside the repo. Tick them off as they're done.
 - [x] Zone `simonalla.fr` active on Cloudflare (waiting for the `.fr` registry to publish the nameservers)
 - [x] Custom domain `simonalla.fr` on the Worker
 - [ ] `www.simonalla.fr` redirects to `simonalla.fr`: in the Cloudflare dashboard, zone → Rules → Redirect Rules → template "Redirect from WWW to root" (it also creates the proxied `www` DNS record if asked)
-- [ ] Email sending on `simonalla.fr` (`npx wrangler email sending enable simonalla.fr`), then set `CONTACT_FROM_EMAIL` in `web/wrangler.jsonc`
+- [ ] Contact form email (**on hold until Simon can access his inbox**). Cloudflare Email Sending needs Workers Paid, but sending to *verified* addresses through Email Routing is free:
+  1. Dashboard → `simonalla.fr` → Email → Email Routing: enable it and accept the DNS records.
+  2. Add `simonalla9@gmail.com` as a destination address; Simon clicks the verification link in his inbox.
+  3. Optional: routing rule `contact@simonalla.fr` → `simonalla9@gmail.com`.
+  4. Then: set `CONTACT_FROM_EMAIL` to `site@simonalla.fr` and `allowed_sender_addresses` on the `send_email` binding in `web/wrangler.jsonc`, note in Studio that the recipient must be a verified address, deploy, send a real test through the form. If Cloudflare refuses to send from a routing-only domain, fall back to Resend's free plan or Workers Paid ($5/month).
 - [ ] Invite Simon to the Sanity project as an editor
 
 ### Sanity webhook → GitHub Actions
