@@ -1,16 +1,197 @@
 ---
+import RingedPhoto from '../components/RingedPhoto.astro'
+import ServiceCard from '../components/ServiceCard.astro'
+import Wave from '../components/Wave.astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import {cta, intro, services, site} from '../data/placeholder'
 ---
 
-<html lang="fr">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Simon Alla — L’atelier Pierre &amp; Paysage</title>
-	</head>
-	<body>
-		<h1>Simon Alla — L’atelier Pierre &amp; Paysage</h1>
-	</body>
-</html>
+<BaseLayout
+  title={`${site.firstName} Alla — ${site.tagline}`}
+  description="Simon Alla, artisan de la pierre : débit et taille de pierre, petite maçonnerie, aménagements paysagers et entretien de tours de tombe."
+>
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-text">
+        <h1>{site.firstName} <span>{site.lastName}</span></h1>
+        <p class="tagline">{site.tagline}</p>
+        <div class="actions">
+          <a class="button button--yellow" href="#contact">{cta.buttonLabel}</a>
+          <a class="button button--outline" href={site.phoneHref}>{site.phone}</a>
+        </div>
+      </div>
+      <RingedPhoto src={`${site.logoUrl}?w=680&h=680&fit=crop&auto=format`} alt="" />
+    </div>
+  </section>
+  <Wave above="var(--forest)" below="var(--paper)" accent="var(--yellow)" />
+
+  <section class="intro" id="presentation">
+    <div class="blob blob--left" aria-hidden="true"></div>
+    <div class="container intro-inner">
+      <div class="prose intro-text">
+        {intro.map((p) => <p set:html={p} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="services" id="services">
+    <div class="blob blob--right" aria-hidden="true"></div>
+    <div class="container">
+      <h2 class="section-title">Les services</h2>
+      <ul class="service-grid">
+        {
+          services.map((s, i) => (
+            <li>
+              <ServiceCard title={s.title} summary={s.summary} index={i} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="projects" id="realisations">
+    <div class="container">
+      <h2 class="section-title">Réalisations</h2>
+      <p class="empty">Les premières réalisations seront bientôt en ligne.</p>
+    </div>
+  </section>
+
+  <section class="cta-section" id="contact">
+    <div class="container">
+      <div class="cta">
+        <h2>{cta.title}</h2>
+        <p>{cta.text}</p>
+        <div class="actions">
+          <a class="button button--yellow" href={site.phoneHref}>{site.phone}</a>
+          <a class="button button--outline" href={`mailto:${site.email}`}>{site.email}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Hero: dark green, as the top of the flyer. Phase 3 adds the background photo from Sanity. */
+  .hero {
+    background:
+      radial-gradient(ellipse at 15% 20%, rgb(141 162 80 / 18%), transparent 55%),
+      radial-gradient(ellipse at 85% 90%, rgb(0 0 0 / 30%), transparent 60%),
+      var(--forest);
+    color: var(--white);
+    padding-block: clamp(40px, 7vw, 96px) clamp(24px, 4vw, 48px);
+  }
+  .hero-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+  }
+  h1 {
+    font-size: clamp(3rem, 9vw, 5.5rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  h1 span {
+    color: var(--olive);
+  }
+  .tagline {
+    font-family: var(--font-serif);
+    color: var(--yellow);
+    font-size: clamp(1.6rem, 4vw, 2.5rem);
+    line-height: 1.2;
+    margin: 0.3em 0 1.2em;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  @media (max-width: 760px) {
+    .hero-inner {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .hero :global(.ring) {
+      --size: min(64vw, 260px) !important;
+      align-self: center;
+    }
+  }
+
+  /* Yellow blobs, half off the screen edge, as on the flyer. */
+  .intro,
+  .services {
+    position: relative;
+    isolation: isolate;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--yellow);
+    z-index: -1;
+  }
+  .blob--left {
+    width: clamp(220px, 34vw, 460px);
+    aspect-ratio: 1;
+    left: calc(clamp(220px, 34vw, 460px) / -2);
+    top: 10%;
+  }
+  .blob--right {
+    width: clamp(260px, 40vw, 560px);
+    aspect-ratio: 1;
+    right: calc(clamp(260px, 40vw, 560px) / -2.4);
+    top: 25%;
+  }
+  .intro {
+    padding-block: var(--section-y) calc(var(--section-y) / 2);
+  }
+  .intro-inner {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .intro-text {
+    max-width: 620px;
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+  }
+
+  .services {
+    padding-block: calc(var(--section-y) / 2) var(--section-y);
+  }
+  .service-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .projects {
+    padding-bottom: var(--section-y);
+  }
+  .empty {
+    color: var(--muted);
+  }
+
+  .cta {
+    background: var(--forest);
+    color: var(--white);
+    border-radius: calc(var(--radius) * 2);
+    padding: clamp(32px, 6vw, 64px);
+    text-align: center;
+  }
+  .cta h2 {
+    font-family: var(--font-serif);
+    color: var(--yellow);
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-bottom: 0.4em;
+  }
+  .cta p {
+    font-size: 1.15rem;
+    opacity: 0.9;
+  }
+  .cta .actions {
+    justify-content: center;
+    margin-top: 24px;
+  }
+</style>

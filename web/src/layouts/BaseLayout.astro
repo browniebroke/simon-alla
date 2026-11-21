@@ -1,0 +1,36 @@
+---
+import '@fontsource-variable/jost'
+import '@fontsource/playfair-display/700.css'
+import '../styles/global.css'
+import CallButton from '../components/CallButton.astro'
+import SiteFooter from '../components/SiteFooter.astro'
+import SiteHeader from '../components/SiteHeader.astro'
+
+interface Props {
+  title: string
+  description?: string
+}
+const {title, description} = Astro.props
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <meta name="theme-color" content="#1e2d16" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body>
+    <a class="visually-hidden skip-link" href="#contenu">Aller au contenu</a>
+    <SiteHeader />
+    <main id="contenu">
+      <slot />
+    </main>
+    <SiteFooter />
+    <CallButton />
+  </body>
+</html>

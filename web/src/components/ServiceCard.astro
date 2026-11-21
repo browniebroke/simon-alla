@@ -1,0 +1,45 @@
+---
+interface Props {
+  title: string
+  summary: string
+  index: number
+}
+const {title, summary, index} = Astro.props
+---
+
+<article class="card">
+  <span class="num" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+  <h3>{title}</h3>
+  <p>{summary}</p>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 28px 24px 24px;
+    box-shadow: var(--shadow);
+    border-top: 5px solid var(--yellow);
+    height: 100%;
+  }
+  .num {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    color: var(--olive);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--forest);
+    margin-bottom: 0.5em;
+  }
+  p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1rem;
+  }
+</style>

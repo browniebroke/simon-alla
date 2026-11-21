@@ -1,0 +1,149 @@
+/* Design tokens taken from the flyer and business card (see docs/plan.html, section 3). */
+:root {
+  --forest: #1e2d16;
+  --forest-2: #2a3d1f;
+  --olive: #8da250;
+  --yellow: #f7c600;
+  --paper: #fbfaf6;
+  --stone: #e9e4d8;
+  --ink: #24301d;
+  --muted: #56604e;
+  --white: #ffffff;
+
+  --font-sans: 'Jost Variable', 'Jost', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+
+  --container: 1120px;
+  --gutter: clamp(16px, 4vw, 32px);
+  --section-y: clamp(56px, 9vw, 112px);
+  --radius: 16px;
+  --shadow: 0 10px 30px rgb(30 45 22 / 10%);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.15;
+  margin: 0;
+}
+
+p {
+  margin: 0 0 1em;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Section titles: uppercase Jost, as "LES SERVICES" on the flyer. */
+.section-title {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--forest);
+  margin-bottom: 0.75em;
+}
+
+/* Bold words in body text show in dark green, as on the flyer. */
+.prose strong {
+  color: var(--forest);
+  font-weight: 700;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.8em 1.5em;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.button--yellow {
+  background: var(--yellow);
+  color: var(--forest);
+}
+
+.button--outline {
+  border: 2px solid currentColor;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip-link:focus {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 20;
+  width: auto;
+  height: auto;
+  clip: auto;
+  padding: 8px 16px;
+  background: var(--yellow);
+  color: var(--forest);
+  border-radius: 8px;
+}
