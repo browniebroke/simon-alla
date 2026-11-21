@@ -6,6 +6,9 @@
   "account_id": "a5251ea58358674463cdcbe404b884bf",
   "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-11-17",
+  // simonalla.fr is attached as a Custom Domain (Cloudflare creates the DNS record).
+  // www.simonalla.fr is redirected to it by a Redirect Rule on the zone, not by the Worker.
+  "routes": [{"pattern": "simonalla.fr", "custom_domain": true}],
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist",

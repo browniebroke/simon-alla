@@ -4,6 +4,7 @@ import {defineConfig, envField} from 'astro/config'
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://simonalla.fr',
   // Every page is prerendered at build time; only /api/contact runs on the Worker.
   adapter: cloudflare({
     // Photos come resized from the Sanity CDN: no Cloudflare Images binding needed.
