@@ -6,14 +6,14 @@
     "node": ">=22.23.4"
   },
   "scripts": {
-    "dev": "wrangler types && astro dev",
-    "build": "wrangler types && astro check && astro build",
-    "preview": "wrangler types && astro preview",
+    "dev": "wrangler types --strict-vars=false && astro dev",
+    "build": "wrangler types --strict-vars=false && astro check && astro build",
+    "preview": "wrangler types --strict-vars=false && astro preview",
     "astro": "astro",
     "deploy": "npm run build && wrangler deploy",
-    "types": "wrangler types",
+    "types": "wrangler types --strict-vars=false",
     "lint": "eslint .",
-    "typecheck": "wrangler types && astro check"
+    "typecheck": "wrangler types --strict-vars=false && astro check"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.4.9",

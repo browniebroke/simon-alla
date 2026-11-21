@@ -23,7 +23,10 @@
     // Leave empty until the domain is set up: the form then answers with an error.
     "CONTACT_FROM_EMAIL": "",
     "CONTACT_FROM_NAME": "Site L’atelier Pierre & Paysage",
+    // "true" logs contact emails instead of sending them (set in .dev.vars for local dev).
+    "EMAIL_DRY_RUN": "false",
   },
-  // Secrets (set with `npx wrangler secret put <NAME>`, never committed):
-  // - TURNSTILE_SECRET_KEY
+  // Secrets: set with `npx wrangler secret put <NAME>`, never committed.
+  // Declared here so `wrangler types` doesn't depend on a local .dev.vars.
+  "secrets": {"required": ["TURNSTILE_SECRET_KEY"]},
 }
