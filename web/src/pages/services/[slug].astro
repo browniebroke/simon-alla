@@ -1,0 +1,83 @@
+---
+import ContactBox from '../../components/ContactBox.astro'
+import Gallery from '../../components/Gallery.astro'
+import PageHeader from '../../components/PageHeader.astro'
+import ProjectGrid from '../../components/ProjectGrid.astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import {hasImage, imageUrl, srcSet} from '../../lib/image'
+import {renderRichText} from '../../lib/portableText'
+import {getServicesFull, type Service} from '../../lib/sanity'
+
+export async function getStaticPaths() {
+  const services = await getServicesFull()
+  return services.map((service) => ({params: {slug: service.slug}, props: {service}}))
+}
+
+const {service} = Astro.props as {service: Service}
+const cover = hasImage(service.coverImage) ? service.coverImage : undefined
+---
+
+<BaseLayout title={service.title} description={service.summary} image={cover} seo={service.seo}>
+  <PageHeader
+    title={service.title}
+    lead={service.summary}
+    kicker="Services"
+    kickerHref="/services/"
+  />
+  <article class="container content">
+    {
+      cover && (
+        <img
+          class="cover"
+          src={imageUrl(cover, 1100, 620)}
+          srcset={srcSet(cover, [600, 900, 1100, 1600], 620 / 1100)}
+          sizes="(max-width: 1120px) 100vw, 1056px"
+          alt={cover.alt ?? ''}
+          width="1100"
+          height="620"
+        />
+      )
+    }
+    {service.body && <div class="prose body" set:html={renderRichText(service.body)} />}
+    {
+      service.gallery && service.gallery.length > 0 && (
+        <section>
+          <h2 class="section-title">Photos</h2>
+          <Gallery photos={service.gallery} />
+        </section>
+      )
+    }
+    {
+      service.projects.length > 0 && (
+        <section>
+          <h2 class="section-title">Réalisations</h2>
+          <ProjectGrid projects={service.projects} />
+        </section>
+      )
+    }
+    <p><a class="back" href="/services/">← Tous les services</a></p>
+  </article>
+  <ContactBox />
+</BaseLayout>
+
+<style>
+  .content {
+    padding-top: calc(var(--section-y) / 2);
+    display: grid;
+    gap: calc(var(--section-y) / 2);
+  }
+  .cover {
+    width: 100%;
+    border-radius: var(--radius);
+    aspect-ratio: 1100 / 620;
+    object-fit: cover;
+  }
+  .body {
+    max-width: 68ch;
+    font-size: 1.125rem;
+  }
+  .back {
+    color: var(--forest);
+    font-weight: 600;
+  }
+</style>

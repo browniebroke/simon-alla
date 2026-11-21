@@ -1,5 +1,11 @@
 ---
-import {site} from '../data/placeholder'
+import {telHref} from '../lib/format'
+import type {SiteSettings} from '../lib/sanity'
+
+interface Props {
+  settings: SiteSettings
+}
+const {settings} = Astro.props
 const year = new Date().getFullYear()
 ---
 
@@ -16,13 +22,31 @@ const year = new Date().getFullYear()
   <div class="body">
     <div class="container">
       <p class="contact">
-        <a href={site.phoneHref}>{site.phone}</a>
+        <a href={telHref(settings.phone)}>{settings.phone}</a>
         <span aria-hidden="true"> / </span>
-        <a href={`mailto:${site.email}`}>{site.email}</a>
+        <a href={`mailto:${settings.email}`}>{settings.email}</a>
       </p>
+      {settings.serviceArea && <p class="area">{settings.serviceArea}</p>}
       <p class="legal">
-        © {year} {site.firstName} Alla · {site.tagline}
-        <!-- Phase 3: links to /mentions-legales/ and /confidentialite/ -->
+        © {year} {settings.name}{settings.tagline && ` · ${settings.tagline}`}
+        {
+          settings.pages.map((p) => (
+            <>
+              {' · '}
+              <a href={`/${p.slug}/`}>{p.title}</a>
+            </>
+          ))
+        }
+        {
+          settings.socialLinks?.map((s) => (
+            <>
+              {' · '}
+              <a href={s.url} rel="noopener noreferrer">
+                {s.label}
+              </a>
+            </>
+          ))
+        }
       </p>
     </div>
   </div>
@@ -60,6 +84,15 @@ const year = new Date().getFullYear()
   }
   .contact a:hover {
     color: var(--yellow);
+  }
+  .area {
+    opacity: 0.85;
+  }
+  .legal a {
+    text-decoration: none;
+  }
+  .legal a:hover {
+    text-decoration: underline;
   }
   .legal {
     font-size: 0.875rem;

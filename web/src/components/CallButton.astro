@@ -1,8 +1,13 @@
 ---
-import {site} from '../data/placeholder'
+import {telHref} from '../lib/format'
+
+interface Props {
+  phone: string
+}
+const {phone} = Astro.props
 ---
 
-<a class="call button button--yellow" href={site.phoneHref} aria-label={`Appeler le ${site.phone}`}>
+<a class="call button button--yellow" href={telHref(phone)} aria-label={`Appeler le ${phone}`}>
   <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
     <path
       fill="currentColor"

@@ -147,3 +147,22 @@ a {
   color: var(--forest);
   border-radius: 8px;
 }
+
+/* Rich text from Sanity */
+.prose a {
+  color: var(--forest);
+  font-weight: 500;
+  text-decoration-color: var(--olive);
+  text-underline-offset: 3px;
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.3em;
+  margin: 0 0 1em;
+}
+.prose li::marker {
+  color: var(--olive);
+}
+.prose > :last-child {
+  margin-bottom: 0;
+}

@@ -1,25 +1,40 @@
 ---
-import {site} from '../data/placeholder'
+import {splitName, telHref} from '../lib/format'
+import type {SiteSettings} from '../lib/sanity'
 
-// Phase 2: links point to sections of the home page; phase 3 adds the real pages.
+interface Props {
+  settings: SiteSettings
+}
+const {settings} = Astro.props
+const [first, last] = splitName(settings.name)
+
 const links = [
-  {href: '/#services', label: 'Services'},
-  {href: '/#realisations', label: 'Réalisations'},
-  {href: '/#contact', label: 'Contact'},
+  {href: '/services/', label: 'Services'},
+  {href: '/realisations/', label: 'Réalisations'},
+  {href: '/contact/', label: 'Contact'},
 ]
+const current = Astro.url.pathname
 ---
 
 <header class="header">
   <div class="container inner">
     <a class="brand" href="/">
-      {site.firstName} <span>{site.lastName}</span>
+      {first} <span>{last}</span>
     </a>
     <nav aria-label="Navigation principale">
       <ul>
-        {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        {
+          links.map((l) => (
+            <li>
+              <a href={l.href} aria-current={current.startsWith(l.href) ? 'page' : undefined}>
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
       </ul>
     </nav>
-    <a class="button button--yellow phone" href={site.phoneHref}>{site.phone}</a>
+    <a class="button button--yellow phone" href={telHref(settings.phone)}>{settings.phone}</a>
   </div>
 </header>
 
@@ -55,6 +70,10 @@ const links = [
     text-decoration: none;
     font-weight: 500;
     opacity: 0.9;
+  }
+  nav a[aria-current='page'] {
+    color: var(--yellow);
+    opacity: 1;
   }
   nav a:hover {
     color: var(--yellow);

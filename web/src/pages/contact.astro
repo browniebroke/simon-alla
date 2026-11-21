@@ -1,0 +1,106 @@
+---
+import PageHeader from '../components/PageHeader.astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import {telHref} from '../lib/format'
+import {renderRichText} from '../lib/portableText'
+import {getContactPage, getSettings} from '../lib/sanity'
+
+const [settings, page] = await Promise.all([getSettings(), getContactPage()])
+---
+
+<BaseLayout
+  title={page.title}
+  description={`Contactez ${settings.name} au ${settings.phone} ou par e-mail.`}
+  seo={page.seo}
+>
+  <PageHeader title={page.title} />
+  <section class="container content">
+    {page.intro && <div class="prose intro" set:html={renderRichText(page.intro)} />}
+    <div class="cards">
+      <a class="card" href={telHref(settings.phone)}>
+        <span class="label">Téléphone</span>
+        <span class="value">{settings.phone}</span>
+      </a>
+      <a class="card" href={`mailto:${settings.email}`}>
+        <span class="label">E-mail</span>
+        <span class="value">{settings.email}</span>
+      </a>
+    </div>
+    {
+      (settings.serviceArea || settings.towns?.length || settings.availability) && (
+        <div class="details">
+          {settings.serviceArea && (
+            <div>
+              <h2>Zone d’intervention</h2>
+              <p>{settings.serviceArea}</p>
+              {settings.towns && settings.towns.length > 0 && <p class="towns">{settings.towns.join(' · ')}</p>}
+            </div>
+          )}
+          {settings.availability && (
+            <div>
+              <h2>Disponibilités</h2>
+              <p>{settings.availability}</p>
+            </div>
+          )}
+        </div>
+      )
+    }
+    <!-- Phase 4: contact form (Turnstile + email). -->
+  </section>
+</BaseLayout>
+
+<style>
+  .content {
+    padding-top: calc(var(--section-y) / 2);
+    display: grid;
+    gap: 32px;
+  }
+  .intro {
+    max-width: 62ch;
+    font-size: 1.15rem;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    display: grid;
+    gap: 4px;
+    background: var(--white);
+    border-radius: var(--radius);
+    border-left: 6px solid var(--yellow);
+    box-shadow: var(--shadow);
+    padding: 24px 28px;
+    text-decoration: none;
+    transition: transform 0.15s ease;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+  }
+  .label {
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .value {
+    color: var(--forest);
+    font-weight: 700;
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+    overflow-wrap: anywhere;
+  }
+  .details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  .details h2 {
+    font-size: 1.2rem;
+    color: var(--forest);
+    margin-bottom: 0.4em;
+  }
+  .towns {
+    color: var(--muted);
+  }
+</style>

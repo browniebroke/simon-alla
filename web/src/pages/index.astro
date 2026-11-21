@@ -1,48 +1,62 @@
 ---
+import ContactBox from '../components/ContactBox.astro'
+import ProjectGrid from '../components/ProjectGrid.astro'
 import RingedPhoto from '../components/RingedPhoto.astro'
 import ServiceCard from '../components/ServiceCard.astro'
 import Wave from '../components/Wave.astro'
 import BaseLayout from '../layouts/BaseLayout.astro'
-import {cta, intro, services, site} from '../data/placeholder'
+import {splitName, telHref} from '../lib/format'
+import {hasImage, imageUrl} from '../lib/image'
+import {renderRichText} from '../lib/portableText'
+import {getHomePage, getSettings} from '../lib/sanity'
+
+const [settings, home] = await Promise.all([getSettings(), getHomePage()])
+const [first, last] = splitName(home.heroTitle ?? settings.name)
+const subtitle = home.heroSubtitle ?? settings.tagline
+const heroPhoto = hasImage(home.heroPhoto) ? home.heroPhoto : undefined
+const logo = hasImage(settings.logo) ? settings.logo : undefined
+const background = hasImage(home.heroBackground)
+  ? `--hero-bg: url('${imageUrl(home.heroBackground, 1920, 1000)}')`
+  : undefined
 ---
 
-<BaseLayout
-  title={`${site.firstName} Alla — ${site.tagline}`}
-  description="Simon Alla, artisan de la pierre : débit et taille de pierre, petite maçonnerie, aménagements paysagers et entretien de tours de tombe."
->
-  <section class="hero">
+<BaseLayout seo={home.seo}>
+  <section class="hero" class:list={{'has-bg': background}} style={background}>
     <div class="container hero-inner">
       <div class="hero-text">
-        <h1>{site.firstName} <span>{site.lastName}</span></h1>
-        <p class="tagline">{site.tagline}</p>
+        <h1>{first} <span>{last}</span></h1>
+        {subtitle && <p class="tagline">{subtitle}</p>}
         <div class="actions">
-          <a class="button button--yellow" href="#contact">{cta.buttonLabel}</a>
-          <a class="button button--outline" href={site.phoneHref}>{site.phone}</a>
+          <a class="button button--yellow" href="/contact/">{home.cta?.buttonLabel ?? 'Me contacter'}</a>
+          <a class="button button--outline" href={telHref(settings.phone)}>{settings.phone}</a>
         </div>
       </div>
-      <RingedPhoto src={`${site.logoUrl}?w=680&h=680&fit=crop&auto=format`} alt="" />
+      {heroPhoto && <RingedPhoto photo={heroPhoto} />}
+      {!heroPhoto && logo && <RingedPhoto photo={logo} contain />}
     </div>
   </section>
   <Wave above="var(--forest)" below="var(--paper)" accent="var(--yellow)" />
 
-  <section class="intro" id="presentation">
-    <div class="blob blob--left" aria-hidden="true"></div>
-    <div class="container intro-inner">
-      <div class="prose intro-text">
-        {intro.map((p) => <p set:html={p} />)}
-      </div>
-    </div>
-  </section>
+  {
+    home.intro && (
+      <section class="intro" id="presentation">
+        <div class="blob blob--left" aria-hidden="true" />
+        <div class="container intro-inner">
+          <div class="prose intro-text" set:html={renderRichText(home.intro)} />
+        </div>
+      </section>
+    )
+  }
 
   <section class="services" id="services">
     <div class="blob blob--right" aria-hidden="true"></div>
     <div class="container">
-      <h2 class="section-title">Les services</h2>
+      <h2 class="section-title">{home.servicesTitle ?? 'Les services'}</h2>
       <ul class="service-grid">
         {
-          services.map((s, i) => (
+          home.services.map((s, i) => (
             <li>
-              <ServiceCard title={s.title} summary={s.summary} index={i} />
+              <ServiceCard service={s} index={i} />
             </li>
           ))
         }
@@ -52,27 +66,19 @@ import {cta, intro, services, site} from '../data/placeholder'
 
   <section class="projects" id="realisations">
     <div class="container">
-      <h2 class="section-title">Réalisations</h2>
-      <p class="empty">Les premières réalisations seront bientôt en ligne.</p>
+      <div class="section-head">
+        <h2 class="section-title">Réalisations</h2>
+        {home.projects.length > 0 && <a href="/realisations/">Toutes les réalisations →</a>}
+      </div>
+      <ProjectGrid projects={home.projects} />
     </div>
   </section>
 
-  <section class="cta-section" id="contact">
-    <div class="container">
-      <div class="cta">
-        <h2>{cta.title}</h2>
-        <p>{cta.text}</p>
-        <div class="actions">
-          <a class="button button--yellow" href={site.phoneHref}>{site.phone}</a>
-          <a class="button button--outline" href={`mailto:${site.email}`}>{site.email}</a>
-        </div>
-      </div>
-    </div>
-  </section>
+  <ContactBox title={home.cta?.title} text={home.cta?.text} buttonLabel={home.cta?.buttonLabel} />
 </BaseLayout>
 
 <style>
-  /* Hero: dark green, as the top of the flyer. Phase 3 adds the background photo from Sanity. */
+  /* Hero: dark green, as the top of the flyer, over the background photo when there is one. */
   .hero {
     background:
       radial-gradient(ellipse at 15% 20%, rgb(141 162 80 / 18%), transparent 55%),
@@ -80,6 +86,12 @@ import {cta, intro, services, site} from '../data/placeholder'
       var(--forest);
     color: var(--white);
     padding-block: clamp(40px, 7vw, 96px) clamp(24px, 4vw, 48px);
+  }
+  .hero.has-bg {
+    background:
+      linear-gradient(rgb(30 45 22 / 78%), rgb(30 45 22 / 88%)),
+      var(--hero-bg) center / cover,
+      var(--forest);
   }
   .hero-inner {
     display: flex;
@@ -142,6 +154,7 @@ import {cta, intro, services, site} from '../data/placeholder'
     right: calc(clamp(260px, 40vw, 560px) / -2.4);
     top: 25%;
   }
+
   .intro {
     padding-block: var(--section-y) calc(var(--section-y) / 2);
   }
@@ -166,32 +179,16 @@ import {cta, intro, services, site} from '../data/placeholder'
     gap: 20px;
   }
 
-  .projects {
-    padding-bottom: var(--section-y);
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0 24px;
   }
-  .empty {
-    color: var(--muted);
-  }
-
-  .cta {
-    background: var(--forest);
-    color: var(--white);
-    border-radius: calc(var(--radius) * 2);
-    padding: clamp(32px, 6vw, 64px);
-    text-align: center;
-  }
-  .cta h2 {
-    font-family: var(--font-serif);
-    color: var(--yellow);
-    font-size: clamp(2rem, 5vw, 3rem);
-    margin-bottom: 0.4em;
-  }
-  .cta p {
-    font-size: 1.15rem;
-    opacity: 0.9;
-  }
-  .cta .actions {
-    justify-content: center;
-    margin-top: 24px;
+  .section-head a {
+    font-weight: 600;
+    color: var(--forest);
+    margin-bottom: 1.2em;
   }
 </style>

@@ -1,0 +1,54 @@
+---
+/** Photo grid; each photo links to the full-size image. */
+import {imageUrl, srcSet} from '../lib/image'
+import type {Photo} from '../lib/sanity'
+
+interface Props {
+  photos: Photo[]
+}
+const photos = Astro.props.photos.filter((p) => p.asset)
+---
+
+{
+  photos.length > 0 && (
+    <ul class="gallery">
+      {photos.map((photo) => (
+        <li>
+          <a href={imageUrl(photo, 2000)} target="_blank" rel="noopener">
+            <img
+              src={imageUrl(photo, 600, 450)}
+              srcset={srcSet(photo, [400, 600, 900], 3 / 4)}
+              sizes="(max-width: 640px) 50vw, 300px"
+              alt={photo.alt ?? ''}
+              width="600"
+              height="450"
+              loading="lazy"
+              decoding="async"
+            />
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .gallery {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(45%, 240px), 1fr));
+    gap: 12px;
+  }
+  img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: opacity 0.15s ease;
+  }
+  a:hover img {
+    opacity: 0.85;
+  }
+</style>

@@ -1,0 +1,40 @@
+---
+/** Simple text pages from Sanity: mentions légales, confidentialité… */
+import PageHeader from '../components/PageHeader.astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import {renderRichText} from '../lib/portableText'
+import {getSimplePages, type SimplePage} from '../lib/sanity'
+
+export async function getStaticPaths() {
+  const pages = await getSimplePages()
+  return pages.map((page) => ({params: {slug: page.slug}, props: {page}}))
+}
+
+const {page} = Astro.props as {page: SimplePage}
+---
+
+<BaseLayout title={page.title} seo={page.seo}>
+  <PageHeader title={page.title} />
+  <article class="container">
+    <div class="prose body" set:html={renderRichText(page.body)} />
+  </article>
+</BaseLayout>
+
+<style>
+  article {
+    padding-top: calc(var(--section-y) / 2);
+  }
+  .body {
+    max-width: 72ch;
+  }
+  .body :global(h2) {
+    font-size: 1.5rem;
+    color: var(--forest);
+    margin: 1.4em 0 0.5em;
+  }
+  .body :global(h3) {
+    font-size: 1.2rem;
+    color: var(--forest);
+    margin: 1.2em 0 0.4em;
+  }
+</style>

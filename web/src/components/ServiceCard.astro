@@ -1,16 +1,36 @@
 ---
+import {hasImage, imageUrl, srcSet} from '../lib/image'
+import type {ServiceSummary} from '../lib/sanity'
+
 interface Props {
-  title: string
-  summary: string
+  service: ServiceSummary
   index: number
+  showImage?: boolean
 }
-const {title, summary, index} = Astro.props
+const {service, index, showImage = false} = Astro.props
+const image = showImage && hasImage(service.coverImage) ? service.coverImage : undefined
 ---
 
 <article class="card">
-  <span class="num" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-  <h3>{title}</h3>
-  <p>{summary}</p>
+  {
+    image && (
+      <img
+        src={imageUrl(image, 600, 400)}
+        srcset={srcSet(image, [400, 600, 900], 2 / 3)}
+        sizes="(max-width: 640px) 100vw, 360px"
+        alt={image.alt ?? ''}
+        width="600"
+        height="400"
+        loading="lazy"
+        decoding="async"
+      />
+    )
+  }
+  <div class="body">
+    <span class="num" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+    <h3><a href={`/services/${service.slug}/`}>{service.title}</a></h3>
+    <p>{service.summary}</p>
+  </div>
 </article>
 
 <style>
@@ -18,10 +38,22 @@ const {title, summary, index} = Astro.props
     position: relative;
     background: var(--white);
     border-radius: var(--radius);
-    padding: 28px 24px 24px;
     box-shadow: var(--shadow);
     border-top: 5px solid var(--yellow);
     height: 100%;
+    overflow: hidden;
+    transition: transform 0.15s ease;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+  }
+  img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+  .body {
+    padding: 28px 24px 24px;
   }
   .num {
     display: block;
@@ -36,6 +68,15 @@ const {title, summary, index} = Astro.props
     font-weight: 600;
     color: var(--forest);
     margin-bottom: 0.5em;
+  }
+  /* The whole card is clickable through the title link. */
+  h3 a {
+    text-decoration: none;
+  }
+  h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
   }
   p {
     margin: 0;

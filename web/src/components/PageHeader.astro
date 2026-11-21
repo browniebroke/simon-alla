@@ -1,0 +1,55 @@
+---
+/** Dark green title band with the yellow-edged wave, used at the top of inner pages. */
+import Wave from './Wave.astro'
+
+interface Props {
+  title: string
+  kicker?: string
+  kickerHref?: string
+  lead?: string
+}
+const {title, kicker, kickerHref, lead} = Astro.props
+---
+
+<section class="page-header">
+  <div class="container">
+    {kicker && <p class="kicker">{kickerHref ? <a href={kickerHref}>{kicker}</a> : kicker}</p>}
+    <h1>{title}</h1>
+    {lead && <p class="lead">{lead}</p>}
+    <slot />
+  </div>
+</section>
+<Wave above="var(--forest)" below="var(--paper)" accent="var(--yellow)" />
+
+<style>
+  .page-header {
+    background:
+      radial-gradient(ellipse at 15% 20%, rgb(141 162 80 / 18%), transparent 55%),
+      var(--forest);
+    color: var(--white);
+    padding-block: clamp(32px, 6vw, 72px) clamp(8px, 2vw, 24px);
+  }
+  .kicker {
+    color: var(--olive);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.9rem;
+    margin-bottom: 0.5em;
+  }
+  .kicker :global(a) {
+    text-decoration: none;
+  }
+  h1 {
+    font-family: var(--font-serif);
+    color: var(--yellow);
+    font-size: clamp(2rem, 6vw, 3.4rem);
+    max-width: 22ch;
+  }
+  .lead {
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    max-width: 60ch;
+    opacity: 0.9;
+    margin: 0.8em 0 0;
+  }
+</style>

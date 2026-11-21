@@ -1,0 +1,138 @@
+---
+import ContactBox from '../../components/ContactBox.astro'
+import Gallery from '../../components/Gallery.astro'
+import PageHeader from '../../components/PageHeader.astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import {monthYear} from '../../lib/format'
+import {hasImage, imageUrl, srcSet} from '../../lib/image'
+import {renderRichText} from '../../lib/portableText'
+import {getProjectsFull, type Project} from '../../lib/sanity'
+
+export async function getStaticPaths() {
+  const projects = await getProjectsFull()
+  return projects.map((project) => ({params: {slug: project.slug}, props: {project}}))
+}
+
+const {project} = Astro.props as {project: Project}
+const meta = [project.town, monthYear(project.date)].filter(Boolean).join(' · ')
+const before = hasImage(project.beforeAfter?.before) ? project.beforeAfter.before : undefined
+const after = hasImage(project.beforeAfter?.after) ? project.beforeAfter.after : undefined
+---
+
+<BaseLayout title={project.title} description={meta} image={project.coverImage} seo={project.seo}>
+  <PageHeader title={project.title} lead={meta}>
+    {
+      project.service && (
+        <p class="service">
+          <a href={`/services/${project.service.slug}/`}>{project.service.title}</a>
+        </p>
+      )
+    }
+  </PageHeader>
+  <article class="container content">
+    <img
+      class="cover"
+      src={imageUrl(project.coverImage, 1100, 620)}
+      srcset={srcSet(project.coverImage, [600, 900, 1100, 1600], 620 / 1100)}
+      sizes="(max-width: 1120px) 100vw, 1056px"
+      alt={project.coverImage.alt ?? ''}
+      width="1100"
+      height="620"
+    />
+    {project.description && <div class="prose body" set:html={renderRichText(project.description)} />}
+    {
+      before && after && (
+        <section>
+          <h2 class="section-title">Avant / après</h2>
+          <div class="before-after">
+            {[
+              {photo: before, label: 'Avant'},
+              {photo: after, label: 'Après'},
+            ].map(({photo, label}) => (
+              <figure>
+                <img
+                  src={imageUrl(photo, 700, 525)}
+                  srcset={srcSet(photo, [400, 700, 1000], 3 / 4)}
+                  sizes="(max-width: 640px) 100vw, 520px"
+                  alt={photo.alt ?? ''}
+                  width="700"
+                  height="525"
+                  loading="lazy"
+                />
+                <figcaption>{label}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )
+    }
+    {
+      project.gallery && project.gallery.length > 0 && (
+        <section>
+          <h2 class="section-title">Photos</h2>
+          <Gallery photos={project.gallery} />
+        </section>
+      )
+    }
+    <p><a class="back" href="/realisations/">← Toutes les réalisations</a></p>
+  </article>
+  <ContactBox />
+</BaseLayout>
+
+<style>
+  .service {
+    margin: 1em 0 0;
+  }
+  .service a {
+    display: inline-block;
+    background: var(--yellow);
+    color: var(--forest);
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.3em 0.9em;
+    border-radius: 999px;
+    text-decoration: none;
+  }
+  .content {
+    padding-top: calc(var(--section-y) / 2);
+    display: grid;
+    gap: calc(var(--section-y) / 2);
+  }
+  .cover {
+    width: 100%;
+    border-radius: var(--radius);
+    aspect-ratio: 1100 / 620;
+    object-fit: cover;
+  }
+  .body {
+    max-width: 68ch;
+    font-size: 1.125rem;
+  }
+  .before-after {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  figure {
+    margin: 0;
+    position: relative;
+  }
+  figure img {
+    border-radius: var(--radius);
+    width: 100%;
+  }
+  figcaption {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--forest);
+    color: var(--white);
+    font-weight: 600;
+    padding: 0.2em 0.8em;
+    border-radius: 999px;
+  }
+  .back {
+    color: var(--forest);
+    font-weight: 600;
+  }
+</style>
