@@ -1,22 +1,9 @@
-## Development
+# AGENTS.md (web)
 
-When starting the dev server, use background mode:
+Astro 7 site, deployed as a Cloudflare Worker with static assets (`@astrojs/cloudflare` v14, Workers only).
 
-```
-astro dev --background
-```
-
-Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
-
-## Documentation
-
-Full documentation: https://docs.astro.build
-
-Consult these guides before working on related tasks:
-
-- [Adding pages, dynamic routes, or middleware](https://docs.astro.build/en/guides/routing/)
-- [Working with Astro components](https://docs.astro.build/en/basics/astro-components/)
-- [Using React, Vue, Svelte, or other framework components](https://docs.astro.build/en/guides/framework-components/)
-- [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
-- [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
-- [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)
+- Every page is prerendered from Sanity at build time. The only on-demand route is `src/pages/api/contact.ts` (`prerender = false`); keep it that way.
+- Data: `src/lib/sanity.ts` (client, types, GROQ). Images: `src/lib/image.ts` (Sanity CDN URLs, `srcset`). Rich text: `src/lib/portableText.ts`.
+- Styles: plain CSS. Tokens in `src/styles/global.css`, taken from the flyer; scoped `<style>` per component. No CSS framework.
+- Bindings and secrets come from `import {env} from 'cloudflare:workers'`. After editing `wrangler.jsonc`, run `npm run types` (generates `worker-configuration.d.ts`, git-ignored).
+- Local dev: `cp .dev.vars.example .dev.vars`, then `npm run dev` (runs in workerd; `astro dev --background` / `astro dev stop` for a background server). The dry-run setting logs contact emails instead of sending them.

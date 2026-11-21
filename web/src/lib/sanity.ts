@@ -3,7 +3,7 @@ import type {PortableTextBlock} from '@portabletext/types'
 
 /**
  * Content is fetched at build time only: the dataset is public, so no token is needed.
- * A publish in the Studio triggers a rebuild (see docs/plan.html, section 7).
+ * A publish in the Studio triggers a rebuild (Sanity webhook -> .github/workflows/deploy.yml).
  */
 export const client = createClient({
   projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID ?? 'md9oxzrq',

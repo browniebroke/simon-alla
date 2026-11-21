@@ -1,4 +1,4 @@
-/* Design tokens taken from the flyer and business card (see docs/plan.html, section 3). */
+/* Design tokens taken from the flyer and business card. Yellow fails contrast as text on light backgrounds: use it on dark green or behind dark text. */
 :root {
   --forest: #1e2d16;
   --forest-2: #2a3d1f;

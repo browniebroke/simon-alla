@@ -2,8 +2,6 @@
 
 Website for Simon Alla's stone and landscaping business. The site is in French: a static Astro site hosted on Cloudflare, with content edited in Sanity Studio.
 
-See [`docs/plan.html`](docs/plan.html) for the full plan (architecture, design system, content model, build phases).
-
 ## Repository layout
 
 An npm workspaces monorepo:
@@ -12,7 +10,6 @@ An npm workspaces monorepo:
 | --- | --- | --- |
 | [`web/`](web) | Astro site (`@simon-alla/web`) | Cloudflare Workers |
 | [`studio/`](studio) | Sanity Studio (`@simon-alla/studio`) | `*.sanity.studio` |
-| [`docs/`](docs) | Plan and project docs | — |
 | `assets/` | Brand source files (flyer, business card, logo); git-ignored | — |
 
 The site is static: pages are built from Sanity content at build time. The only server code is the contact form endpoint (`web/src/pages/api/contact.ts`). Seed content from the flyer: `npm run seed -w studio`.
@@ -70,7 +67,8 @@ One-off steps done outside the repo. Tick them off as they're done.
 - [ ] GitHub secret `SANITY_AUTH_TOKEN`: read-only (Viewer) Sanity token, for the monthly backup
 - [ ] Sanity webhook → GitHub (see below), with a fine-grained GitHub token stored in the webhook's headers
 - [ ] Turnstile widget for the workers.dev hostname and `simonalla.fr`; site key in the GitHub variable `PUBLIC_TURNSTILE_SITE_KEY`, secret with `npx wrangler secret put TURNSTILE_SECRET_KEY` (from `web/`)
-- [ ] Buy `simonalla.fr` (OVH or Gandi: Cloudflare Registrar doesn't sell `.fr`), add it to Cloudflare as a zone, switch its nameservers
+- [x] Buy `simonalla.fr` (OVH; Cloudflare Registrar doesn't sell `.fr`), add it to Cloudflare as a zone, switch its nameservers
+- [ ] Zone `simonalla.fr` active on Cloudflare (waiting for the `.fr` registry to publish the nameservers)
 - [ ] Custom domain on the Worker; `www` redirects to the bare domain
 - [ ] Email sending on `simonalla.fr` (`npx wrangler email sending enable simonalla.fr`), then set `CONTACT_FROM_EMAIL` in `web/wrangler.jsonc`
 - [ ] Invite Simon to the Sanity project as an editor
@@ -90,3 +88,18 @@ In sanity.io/manage → project → API → Webhooks → Create:
 | HTTP headers | `Authorization: Bearer <token>` and `Accept: application/vnd.github+json` |
 
 The token is a GitHub fine-grained personal access token limited to this repository, with **Actions: read and write** only. It can start workflows but not change code. Keep it only in the webhook settings, and note its expiry date: the webhook stops working when it expires. GitHub answers `204 No Content` when the call works; the webhook's attempt log in Sanity shows failures.
+
+## Next steps
+
+- **SEO and legal:** `LocalBusiness` JSON-LD from the site settings, `@astrojs/sitemap` and `robots.txt` (needs `site: 'https://simonalla.fr'` in the Astro config), canonical URLs. Write the Mentions légales (LCEN: name, legal status, SIRET, address, publication director, host) and Confidentialité pages in Studio. Lighthouse and accessibility pass.
+- **Handover:** invite Simon to Sanity as an editor, write a one-page guide in French ("Ajouter une réalisation", "Changer une photo"), walk him through it.
+- **Later:** photo uploads in the contact form, filtering projects by service, Cloudflare Web Analytics.
+
+### Open questions for Simon
+
+- Legal status, SIRET and business address (for the Mentions légales).
+- Area served: home town and how far he travels.
+- The designer's source files: logo with a transparent background, exact colours, background photos.
+- Licences for the flyer photos, and photos of his own work.
+- Which email he'll use to log in to Sanity, and which one receives form messages.
+- Opening hours or availability to show, if any.
