@@ -19,6 +19,11 @@ The site is static: pages are built from Sanity content at build time. The only 
 
 Sanity project: `md9oxzrq`, dataset `production` (public). Manage it at <https://www.sanity.io/manage/project/md9oxzrq>.
 
+Live:
+
+- Site: <https://simon-alla.bruno-alla-s-account.workers.dev> (until the domain is set up)
+- Studio: <https://simon-alla.sanity.studio>
+
 ## Requirements
 
 - Node.js 22 or later (see `.nvmrc`)
@@ -49,3 +54,5 @@ npm install <package> -w studio
   - `PUBLIC_TURNSTILE_SITE_KEY`: build variable in Workers Builds (defaults to Cloudflare's test key).
   - The recipient is the email set on the Contact page in Sanity, or the site email.
 - **Studio:** `npm run deploy:studio` (runs `sanity deploy`).
+- **Manual site deploy** (normally done by Workers Builds): `npm run deploy -w web`. If `CLOUDFLARE_API_TOKEN` is set in your shell, unset it first so wrangler uses your login; `account_id` in `wrangler.jsonc` pins the account either way.
+- **Backups:** [`.github/workflows/sanity-backup.yml`](.github/workflows/sanity-backup.yml) exports the dataset on the 1st of each month to a GitHub release. Needs a read-only Sanity token in the `SANITY_AUTH_TOKEN` repository secret.
