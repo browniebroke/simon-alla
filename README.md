@@ -47,12 +47,46 @@ npm install <package> -w studio
 
 ## Deployment
 
-- **Site:** a Cloudflare Worker (`simon-alla`) serving the static pages, plus the `/api/contact` route. Workers Builds deploys on every push to `main`; publishing in Sanity triggers a rebuild through a deploy hook. Config: [`web/wrangler.jsonc`](web/wrangler.jsonc).
+- **Site:** a Cloudflare Worker (`simon-alla`) serving the static pages, plus the `/api/contact` route. Config: [`web/wrangler.jsonc`](web/wrangler.jsonc). Deployed by GitHub Actions ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)):
+  - on pushes to `main` that touch `web/`, the root `package*.json` or `.nvmrc`;
+  - when Simon publishes in Sanity: a Sanity webhook triggers the workflow through GitHub's `workflow_dispatch` API;
+  - by hand, from the Actions tab.
 - **Contact form settings:**
   - `CONTACT_FROM_EMAIL` in `wrangler.jsonc`: sender address, on a domain onboarded with `npx wrangler email sending enable <domain>`.
   - `TURNSTILE_SECRET_KEY`: secret, set with `npx wrangler secret put TURNSTILE_SECRET_KEY` (from `web/`).
-  - `PUBLIC_TURNSTILE_SITE_KEY`: build variable in Workers Builds (defaults to Cloudflare's test key).
+  - `PUBLIC_TURNSTILE_SITE_KEY`: GitHub Actions repository **variable**, used at build time (defaults to Cloudflare's test key).
   - The recipient is the email set on the Contact page in Sanity, or the site email.
 - **Studio:** `npm run deploy:studio` (runs `sanity deploy`).
-- **Manual site deploy** (normally done by Workers Builds): `npm run deploy -w web`. If `CLOUDFLARE_API_TOKEN` is set in your shell, unset it first so wrangler uses your login; `account_id` in `wrangler.jsonc` pins the account either way.
+- **Manual site deploy** (normally done by GitHub Actions): `npm run deploy -w web`. If `CLOUDFLARE_API_TOKEN` is set in your shell, unset it first so wrangler uses your login; `account_id` in `wrangler.jsonc` pins the account either way.
 - **Backups:** [`.github/workflows/sanity-backup.yml`](.github/workflows/sanity-backup.yml) exports the dataset on the 1st of each month to a GitHub release. Needs a read-only Sanity token in the `SANITY_AUTH_TOKEN` repository secret.
+
+## Setup checklist
+
+One-off steps done outside the repo. Tick them off as they're done.
+
+- [x] Sanity project and Studio deployed (`simon-alla.sanity.studio`)
+- [x] Worker `simon-alla` created (first deploy by hand to workers.dev)
+- [ ] GitHub secret `CLOUDFLARE_API_TOKEN`: account-owned Cloudflare API token, "Edit Cloudflare Workers" template, scoped to Bruno Alla's Account
+- [ ] GitHub secret `SANITY_AUTH_TOKEN`: read-only (Viewer) Sanity token, for the monthly backup
+- [ ] Sanity webhook → GitHub (see below), with a fine-grained GitHub token stored in the webhook's headers
+- [ ] Turnstile widget for the workers.dev hostname and `simonalla.fr`; site key in the GitHub variable `PUBLIC_TURNSTILE_SITE_KEY`, secret with `npx wrangler secret put TURNSTILE_SECRET_KEY` (from `web/`)
+- [ ] Buy `simonalla.fr` (OVH or Gandi: Cloudflare Registrar doesn't sell `.fr`), add it to Cloudflare as a zone, switch its nameservers
+- [ ] Custom domain on the Worker; `www` redirects to the bare domain
+- [ ] Email sending on `simonalla.fr` (`npx wrangler email sending enable simonalla.fr`), then set `CONTACT_FROM_EMAIL` in `web/wrangler.jsonc`
+- [ ] Invite Simon to the Sanity project as an editor
+
+### Sanity webhook → GitHub Actions
+
+In sanity.io/manage → project → API → Webhooks → Create:
+
+| Setting | Value |
+| --- | --- |
+| URL | `https://api.github.com/repos/browniebroke/simon-alla/actions/workflows/deploy.yml/dispatches` |
+| Dataset | `production` |
+| Trigger on | Create, Update, Delete |
+| Filter | *(empty: every published document)* |
+| Projection | `{"ref": "main"}` |
+| HTTP method | `POST` |
+| HTTP headers | `Authorization: Bearer <token>` and `Accept: application/vnd.github+json` |
+
+The token is a GitHub fine-grained personal access token limited to this repository, with **Actions: read and write** only. It can start workflows but not change code. Keep it only in the webhook settings, and note its expiry date: the webhook stops working when it expires. GitHub answers `204 No Content` when the call works; the webhook's attempt log in Sanity shows failures.

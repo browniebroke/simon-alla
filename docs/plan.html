@@ -100,11 +100,11 @@
   <tr><td>Front end</td><td>Astro, static output, plain CSS</td><td>You already know it. The pages are plain HTML, so they load fast and there's no server to maintain.</td><td>€0</td></tr>
   <tr><td>CMS</td><td>Sanity, with Studio hosted at <code>*.sanity.studio</code></td><td>Polished editor with a French interface. Simon logs in with Google or email and never sees Git.</td><td>€0 (free plan)</td></tr>
   <tr><td>Images and media</td><td>Sanity asset CDN</td><td>Public URLs, resized and converted to WebP/AVIF on the fly, with focal-point cropping. No R2 needed.</td><td>€0</td></tr>
-  <tr><td>Hosting</td><td>Cloudflare Workers with static assets, using the <code>@astrojs/cloudflare</code> adapter (v14 supports Workers only)</td><td>Global CDN and HTTPS. A Workers Builds deploy hook rebuilds the site when Simon publishes.</td><td>€0</td></tr>
+  <tr><td>Hosting</td><td>Cloudflare Workers with static assets, using the <code>@astrojs/cloudflare</code> adapter (v14 supports Workers only), deployed by GitHub Actions</td><td>Global CDN and HTTPS. A Sanity webhook starts the deploy workflow when Simon publishes.</td><td>€0</td></tr>
   <tr><td>Contact form</td><td>One on-demand Astro endpoint, protected by Turnstile</td><td>The only part of the site that runs code on each request.</td><td>€0</td></tr>
   <tr><td>Email sending</td><td>Cloudflare Email Service, or Resend's free plan as a fallback</td><td>Sends contact form messages to Simon's inbox.</td><td>€0</td></tr>
   <tr><td>Analytics</td><td>Cloudflare Web Analytics</td><td>Uses no cookies, so no cookie banner is needed.</td><td>€0</td></tr>
-  <tr><td>Domain</td><td>A <code>.fr</code> name, e.g. <code>atelier-pierre-paysage.fr</code></td><td>Registered with a French registrar (OVH, Gandi), with DNS managed on Cloudflare.</td><td>about €10/year</td></tr>
+  <tr><td>Domain</td><td><code>simonalla.fr</code> (available on 21 November 2026)</td><td>Registered with a French registrar (OVH, Gandi), since Cloudflare Registrar doesn't sell <code>.fr</code>. DNS managed on Cloudflare.</td><td>about €10/year</td></tr>
 </table></div>
 <p>Check Sanity's free-plan limits (seats, documents, bandwidth) when you set up the project. A site this size uses a small fraction of them.</p>
 </section>
@@ -136,7 +136,7 @@
   <text class="t" x="255" y="62">Sanity Content Lake</text><text class="s" x="255" y="82">content + image CDN</text>
 
   <rect class="box cf" x="460" y="36" width="160" height="64" rx="10"/>
-  <text class="t" x="475" y="62">Deploy hook</text><text class="s" x="475" y="82">Workers Builds</text>
+  <text class="t" x="475" y="62">GitHub Actions</text><text class="s" x="475" y="82">deploy workflow</text>
 
   <rect class="box cf" x="460" y="140" width="160" height="64" rx="10"/>
   <text class="t" x="475" y="166">Astro build</text><text class="s" x="475" y="186">fetches content (GROQ)</text>
@@ -177,7 +177,7 @@
 <h3>Repository layout</h3>
 <p>One repo managed with npm workspaces (no extra tooling, since npm comes with Node), with two packages:</p>
 <ul>
-  <li><code>web/</code> is the Astro site, built and deployed to Cloudflare Workers by Workers Builds from Git. Its Cloudflare config is <code>web/wrangler.jsonc</code>.</li>
+  <li><code>web/</code> is the Astro site, built and deployed to Cloudflare Workers by GitHub Actions. Its Cloudflare config is <code>web/wrangler.jsonc</code>.</li>
   <li><code>studio/</code> is Sanity Studio: the schemas plus the French locale (<code>@sanity/locale-fr-fr</code>). You deploy it with <code>sanity deploy</code>.</li>
 </ul>
 <p>The two are connected with the <code>@sanity/astro</code> integration and <code>@sanity/image-url</code>, which builds image URLs.</p>
@@ -272,13 +272,13 @@
 <section id="hosting">
 <h2>7. Hosting, domain and publishing</h2>
 <ol>
-  <li>The GitHub repo is connected to the <code>simon-alla</code> Worker with Workers Builds, which builds and deploys <code>web/</code> on every push to <code>main</code>. The build settings for the monorepo (root directory, build and deploy commands) are checked in phase 5.</li>
-  <li>A Workers Builds deploy hook is called by a Sanity webhook whenever a document is published. The hook URL is the only credential, so it's kept secret in the Sanity webhook settings.</li>
+  <li>The <code>Deploy site</code> GitHub Actions workflow builds <code>web/</code> and runs <code>wrangler deploy</code> on pushes to <code>main</code> that touch the site, using a Cloudflare API token stored as a GitHub secret.</li>
+  <li>A Sanity webhook starts the same workflow through GitHub's <code>workflow_dispatch</code> API whenever a document is published. It authenticates with a fine-grained GitHub token limited to <strong>Actions: read and write</strong> on this repository, so it can start workflows but not change code.</li>
   <li>Simon hits "Publier" and the site is live about 1–2 minutes later. The Studio tells him so in a hint under the publish button.</li>
-  <li>The domain is registered at OVH or Gandi, with its nameservers moved to Cloudflare. The <code>www</code> address redirects to the bare domain.</li>
+  <li><code>simonalla.fr</code> is registered at OVH or Gandi, with its nameservers moved to Cloudflare. The <code>www</code> address redirects to the bare domain.</li>
   <li>Configuration: public settings (sender address and name) are in <code>web/wrangler.jsonc</code>; the Turnstile secret is set with <code>wrangler secret put TURNSTILE_SECRET_KEY</code>; the Turnstile site key is a build variable, <code>PUBLIC_TURNSTILE_SITE_KEY</code>. Email uses the Workers <code>send_email</code> binding, so there's no API key.</li>
 </ol>
-<p><strong>Changed in phase 4:</strong> the plan first picked Cloudflare Pages. The current Astro adapter (v14) no longer supports Pages, and Workers Builds now has deploy hooks, so the site runs on Workers instead.</p>
+<p><strong>Changed in phases 4 and 5:</strong> the plan first picked Cloudflare Pages. The current Astro adapter (v14) no longer supports Pages, so the site runs on Workers. Deploys run from GitHub Actions rather than Workers Builds, to keep the build in the repo and avoid dashboard-only settings.</p>
 <p><strong>Backups:</strong> a monthly GitHub Action runs <code>sanity dataset export</code> and stores the export as a release asset. That covers the case where Sanity loses the data or you want to leave.</p>
 </section>
 
@@ -312,7 +312,7 @@
   <li><strong>Design.</strong> Set up the colour and font tokens and the components (wave dividers, ringed photo, blob, header, footer, service card, project card). Build the home page with hard-coded flyer content and check it matches the flyer.</li>
   <li><strong>Connect content.</strong> Wire Astro to Sanity with GROQ queries and build every page in the site map. Enter the seed content.</li>
   <li><strong>Contact form.</strong> Build the endpoint, Turnstile, email sending and the "Merci" page.</li>
-  <li><strong>Deploy.</strong> Set up the Worker and Workers Builds, the domain and DNS, the email DNS records, the Sanity webhook and deploy hook, and the backup Action.</li>
+  <li><strong>Deploy.</strong> Set up the Worker, the deploy and backup workflows, the Sanity webhook, the domain and DNS, and the email DNS records.</li>
   <li><strong>SEO and legal.</strong> Add the JSON-LD, sitemap and Open Graph images, write the legal pages, and run a Lighthouse and accessibility pass.</li>
   <li><strong>Handover.</strong> Invite Simon to Sanity and write a one-page guide in French ("Ajouter une réalisation", "Changer une photo"). Spend 30 minutes walking him through it.</li>
 </ol>
@@ -321,7 +321,7 @@
 <section id="questions">
 <h2>10. Open questions</h2>
 <ul class="checks">
-  <li>Domain name: has one been chosen or bought?</li>
+  <li>Domain name: <code>simonalla.fr</code> chosen; still to buy.</li>
   <li>Legal status, SIRET and business address, for the Mentions légales.</li>
   <li>Area served: home town and how far he travels.</li>
   <li>The designer's source files: the logo as a vector or high-resolution file with a transparent background, the exact colours, and the background photos.</li>
