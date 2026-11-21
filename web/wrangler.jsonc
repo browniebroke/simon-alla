@@ -9,6 +9,9 @@
   // simonalla.fr is attached as a Custom Domain (Cloudflare creates the DNS record).
   // www.simonalla.fr is redirected to it by a Redirect Rule on the zone, not by the Worker.
   "routes": [{"pattern": "simonalla.fr", "custom_domain": true}],
+  // Only serve on simonalla.fr: no *.workers.dev address or preview URLs (duplicate content).
+  "workers_dev": false,
+  "preview_urls": false,
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist",
@@ -26,7 +29,7 @@
     // "true" logs contact emails instead of sending them (set in .dev.vars for local dev).
     "EMAIL_DRY_RUN": "false",
     // Hostnames the Turnstile token may come from (checked against siteverify's answer).
-    "TURNSTILE_HOSTNAMES": "simonalla.fr,simon-alla.bruno-alla-s-account.workers.dev",
+    "TURNSTILE_HOSTNAMES": "simonalla.fr",
   },
   // Secrets: set with `npx wrangler secret put <NAME>`, never committed.
   // Declared here so `wrangler types` doesn't depend on a local .dev.vars.

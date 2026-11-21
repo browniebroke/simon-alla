@@ -18,7 +18,7 @@ Sanity project: `md9oxzrq`, dataset `production` (public). Manage it at <https:/
 
 Live:
 
-- Site: <https://simon-alla.bruno-alla-s-account.workers.dev> (until the domain is set up)
+- Site: <https://simonalla.fr>
 - Studio: <https://simon-alla.sanity.studio>
 
 ## Requirements
@@ -80,7 +80,8 @@ One-off steps done outside the repo. Tick them off as they're done.
 - [x] Turnstile widget for the workers.dev hostname and `simonalla.fr`; site key in the GitHub variable `PUBLIC_TURNSTILE_SITE_KEY`, secret with `npx wrangler secret put TURNSTILE_SECRET_KEY` (from `web/`)
 - [x] Buy `simonalla.fr` (OVH; Cloudflare Registrar doesn't sell `.fr`), add it to Cloudflare as a zone, switch its nameservers
 - [x] Zone `simonalla.fr` active on Cloudflare (waiting for the `.fr` registry to publish the nameservers)
-- [ ] Custom domain on the Worker; `www` redirects to the bare domain
+- [x] Custom domain `simonalla.fr` on the Worker
+- [ ] `www.simonalla.fr` redirects to `simonalla.fr`: in the Cloudflare dashboard, zone → Rules → Redirect Rules → template "Redirect from WWW to root" (it also creates the proxied `www` DNS record if asked)
 - [ ] Email sending on `simonalla.fr` (`npx wrangler email sending enable simonalla.fr`), then set `CONTACT_FROM_EMAIL` in `web/wrangler.jsonc`
 - [ ] Invite Simon to the Sanity project as an editor
 
