@@ -44,7 +44,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
     {shareImageUrl && <meta property="og:image" content={shareImageUrl} />}
     <meta name="twitter:card" content={shareImageUrl ? 'summary_large_image' : 'summary'} />
     <meta name="theme-color" content="#1e2d16" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Icons generated from Simon's logo (assets/logo.jpeg). Google wants a multiple of 48px. -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://cdn.sanity.io" />
     <meta name="generator" content={Astro.generator} />
     <slot name="head" />
