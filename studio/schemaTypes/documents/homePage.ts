@@ -1,0 +1,95 @@
+import {HomeIcon} from '@sanity/icons/Home'
+import {defineArrayMember, defineField, defineType} from 'sanity'
+
+export const homePage = defineType({
+  name: 'homePage',
+  title: 'Accueil',
+  type: 'document',
+  icon: HomeIcon,
+  groups: [
+    {name: 'hero', title: 'En-tête', default: true},
+    {name: 'content', title: 'Contenu'},
+    {name: 'seo', title: 'Référencement'},
+  ],
+  fields: [
+    defineField({
+      name: 'heroTitle',
+      title: 'Titre',
+      description: 'Si vide, le nom du site est utilisé.',
+      type: 'string',
+      group: 'hero',
+    }),
+    defineField({
+      name: 'heroSubtitle',
+      title: 'Sous-titre',
+      description: 'Si vide, le slogan du site est utilisé.',
+      type: 'string',
+      group: 'hero',
+    }),
+    defineField({
+      name: 'heroBackground',
+      title: 'Photo de fond',
+      description: 'Grande photo sombre derrière le titre (ex. un mur en pierre).',
+      type: 'photo',
+      group: 'hero',
+    }),
+    defineField({
+      name: 'heroPhoto',
+      title: 'Photo ronde',
+      description: 'Affichée dans le cercle jaune.',
+      type: 'photo',
+      group: 'hero',
+    }),
+    defineField({
+      name: 'intro',
+      title: 'Présentation',
+      description: 'Mettez en gras les mots importants : ils s’afficheront en vert.',
+      type: 'blockContent',
+      group: 'content',
+    }),
+    defineField({
+      name: 'servicesTitle',
+      title: 'Titre de la section services',
+      type: 'string',
+      initialValue: 'Les services',
+      group: 'content',
+    }),
+    defineField({
+      name: 'featuredServices',
+      title: 'Services mis en avant',
+      description: 'Si vide, tous les services sont affichés.',
+      type: 'array',
+      of: [defineArrayMember({type: 'reference', to: [{type: 'service'}]})],
+      validation: (rule) => rule.unique(),
+      group: 'content',
+    }),
+    defineField({
+      name: 'featuredProjects',
+      title: 'Réalisations mises en avant',
+      description: 'Jusqu’à 6. Si vide, les plus récentes sont affichées.',
+      type: 'array',
+      of: [defineArrayMember({type: 'reference', to: [{type: 'project'}]})],
+      validation: (rule) => rule.unique().max(6),
+      group: 'content',
+    }),
+    defineField({
+      name: 'cta',
+      title: 'Appel à l’action',
+      description: 'Encadré en bas de page qui invite à prendre contact.',
+      type: 'object',
+      group: 'content',
+      fields: [
+        defineField({name: 'title', title: 'Titre', type: 'string', initialValue: 'Un projet ?'}),
+        defineField({name: 'text', title: 'Texte', type: 'text', rows: 2}),
+        defineField({
+          name: 'buttonLabel',
+          title: 'Texte du bouton',
+          type: 'string',
+          initialValue: 'Me contacter',
+        }),
+      ],
+    }),
+    defineField({name: 'seo', title: 'Référencement', type: 'seo', group: 'seo'}),
+  ],
+  preview: {prepare: () => ({title: 'Accueil'})},
+})

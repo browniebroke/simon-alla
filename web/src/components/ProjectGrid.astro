@@ -1,0 +1,36 @@
+---
+import type {ProjectSummary} from '../lib/sanity'
+import ProjectCard from './ProjectCard.astro'
+
+interface Props {
+  projects: ProjectSummary[]
+  empty?: string
+}
+const {projects, empty = 'Les premières réalisations seront bientôt en ligne.'} = Astro.props
+---
+
+{projects.length > 0 ? (
+  <ul class="grid">
+    {projects.map((p) => (
+      <li>
+        <ProjectCard project={p} />
+      </li>
+    ))}
+  </ul>
+) : (
+  <p class="empty">{empty}</p>
+)}
+
+<style>
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+  }
+  .empty {
+    color: var(--muted);
+  }
+</style>

@@ -1,0 +1,28 @@
+---
+import PageHeader from '../../components/PageHeader.astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import {getContactPage} from '../../lib/sanity'
+
+const page = await getContactPage()
+---
+
+<BaseLayout title="Message envoyé">
+  <meta slot="head" name="robots" content="noindex" />
+  <PageHeader
+    title="Message envoyé"
+    lead={page.successMessage ?? 'Merci pour votre message, je vous recontacte rapidement.'}
+  />
+  <section class="container content">
+    <p>
+      <a class="button button--yellow" href="/">
+        Retour à l’accueil
+      </a>
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .content {
+    padding-top: calc(var(--section-y) / 2);
+  }
+</style>

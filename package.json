@@ -13,6 +13,15 @@
     "dev:web": "npm run dev -w web",
     "dev:studio": "npm run dev -w studio",
     "build:web": "npm run build -w web",
-    "deploy:studio": "npm run deploy -w studio"
+    "deploy:studio": "npm run deploy -w studio",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "npm run lint --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "check": "npm run format:check && npm run lint && npm run typecheck"
+  },
+  "devDependencies": {
+    "prettier": "^3.10.1",
+    "prettier-plugin-astro": "^1.1.2"
   }
 }

@@ -1,0 +1,37 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  // Worker name on Cloudflare (also in the workers.dev URL).
+  "name": "simon-alla",
+  // Bruno Alla's Account: pins deploys to this account whatever credentials are in the shell.
+  "account_id": "a5251ea58358674463cdcbe404b884bf",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-11-17",
+  // simonalla.fr is attached as a Custom Domain (Cloudflare creates the DNS record).
+  // www.simonalla.fr is redirected to it by a Redirect Rule on the zone, not by the Worker.
+  "routes": [{"pattern": "simonalla.fr", "custom_domain": true}],
+  // Only serve on simonalla.fr: no *.workers.dev address or preview URLs (duplicate content).
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist",
+  },
+  "observability": {
+    "enabled": true,
+  },
+  // Cloudflare Email Service: sends the contact form messages to Simon.
+  "send_email": [{"name": "EMAIL"}],
+  "vars": {
+    // Sender address: its domain must be onboarded with `wrangler email sending enable <domain>`.
+    // Leave empty until the domain is set up: the form then answers with an error.
+    "CONTACT_FROM_EMAIL": "",
+    "CONTACT_FROM_NAME": "Site L’atelier Pierre & Paysage",
+    // "true" logs contact emails instead of sending them (set in .dev.vars for local dev).
+    "EMAIL_DRY_RUN": "false",
+    // Hostnames the Turnstile token may come from (checked against siteverify's answer).
+    "TURNSTILE_HOSTNAMES": "simonalla.fr",
+  },
+  // Secrets: set with `npx wrangler secret put <NAME>`, never committed.
+  // Declared here so `wrangler types` doesn't depend on a local .dev.vars.
+  "secrets": {"required": ["TURNSTILE_SECRET_KEY"]},
+}

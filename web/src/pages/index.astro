@@ -1,0 +1,198 @@
+---
+import ContactBox from '../components/ContactBox.astro'
+import ProjectGrid from '../components/ProjectGrid.astro'
+import RingedPhoto from '../components/RingedPhoto.astro'
+import ServiceCard from '../components/ServiceCard.astro'
+import Wave from '../components/Wave.astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import {splitName, telHref} from '../lib/format'
+import {hasImage, imageUrl} from '../lib/image'
+import {renderRichText} from '../lib/portableText'
+import {businessJsonLd} from '../lib/structuredData'
+import {getHomePage, getSettings} from '../lib/sanity'
+
+const [settings, home] = await Promise.all([getSettings(), getHomePage()])
+const [first, last] = splitName(home.heroTitle ?? settings.name)
+const subtitle = home.heroSubtitle ?? settings.tagline
+const heroPhoto = hasImage(home.heroPhoto) ? home.heroPhoto : undefined
+const logo = hasImage(settings.logo) ? settings.logo : undefined
+const jsonLd = businessJsonLd(settings, home.services, Astro.site!)
+const background = hasImage(home.heroBackground)
+  ? `--hero-bg: url('${imageUrl(home.heroBackground, 1920, 1000)}')`
+  : undefined
+---
+
+<BaseLayout seo={home.seo}>
+  <script slot="head" is:inline type="application/ld+json" set:html={jsonLd} />
+  <section class="hero" class:list={{'has-bg': background}} style={background}>
+    <div class="container hero-inner">
+      <div class="hero-text">
+        <h1>
+          {first} <span>{last}</span>
+        </h1>
+        {subtitle && <p class="tagline">{subtitle}</p>}
+        <div class="actions">
+          <a class="button button--yellow" href="/contact/">
+            {home.cta?.buttonLabel ?? 'Me contacter'}
+          </a>
+          <a class="button button--outline" href={telHref(settings.phone)}>
+            {settings.phone}
+          </a>
+        </div>
+      </div>
+      {heroPhoto && <RingedPhoto photo={heroPhoto} />}
+      {!heroPhoto && logo && <RingedPhoto photo={logo} contain />}
+    </div>
+  </section>
+  <Wave above="var(--forest)" below="var(--paper)" accent="var(--yellow)" />
+
+  {home.intro && (
+    <section class="intro" id="presentation">
+      <div class="blob blob--left" aria-hidden="true" />
+      <div class="container intro-inner">
+        <div class="prose intro-text" set:html={renderRichText(home.intro)} />
+      </div>
+    </section>
+  )}
+
+  <section class="services" id="services">
+    <div class="blob blob--right" aria-hidden="true"></div>
+    <div class="container">
+      <h2 class="section-title">{home.servicesTitle ?? 'Les services'}</h2>
+      <ul class="service-grid">
+        {home.services.map((s, i) => (
+          <li>
+            <ServiceCard service={s} index={i} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="projects" id="realisations">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title">Réalisations</h2>
+        {home.projects.length > 0 && <a href="/realisations/">Toutes les réalisations →</a>}
+      </div>
+      <ProjectGrid projects={home.projects} />
+    </div>
+  </section>
+
+  <ContactBox title={home.cta?.title} text={home.cta?.text} buttonLabel={home.cta?.buttonLabel} />
+</BaseLayout>
+
+<style>
+  /* Hero: dark green, as the top of the flyer, over the background photo when there is one. */
+  .hero {
+    background:
+      radial-gradient(ellipse at 15% 20%, rgb(141 162 80 / 18%), transparent 55%),
+      radial-gradient(ellipse at 85% 90%, rgb(0 0 0 / 30%), transparent 60%), var(--forest);
+    color: var(--white);
+    padding-block: clamp(40px, 7vw, 96px) clamp(24px, 4vw, 48px);
+  }
+  .hero.has-bg {
+    background:
+      linear-gradient(rgb(30 45 22 / 78%), rgb(30 45 22 / 88%)),
+      var(--hero-bg) center / cover,
+      var(--forest);
+  }
+  .hero-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+  }
+  h1 {
+    font-size: clamp(3rem, 9vw, 5.5rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  h1 span {
+    color: var(--olive);
+  }
+  .tagline {
+    font-family: var(--font-serif);
+    color: var(--yellow);
+    font-size: clamp(1.6rem, 4vw, 2.5rem);
+    line-height: 1.2;
+    margin: 0.3em 0 1.2em;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  @media (max-width: 760px) {
+    .hero-inner {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .hero :global(.ring) {
+      --size: min(64vw, 260px) !important;
+      align-self: center;
+    }
+  }
+
+  /* Yellow blobs, half off the screen edge, as on the flyer. */
+  .intro,
+  .services {
+    position: relative;
+    isolation: isolate;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--yellow);
+    z-index: -1;
+  }
+  .blob--left {
+    width: clamp(220px, 34vw, 460px);
+    aspect-ratio: 1;
+    left: calc(clamp(220px, 34vw, 460px) / -2);
+    top: 10%;
+  }
+  .blob--right {
+    width: clamp(260px, 40vw, 560px);
+    aspect-ratio: 1;
+    right: calc(clamp(260px, 40vw, 560px) / -2.4);
+    top: 25%;
+  }
+
+  .intro {
+    padding-block: var(--section-y) calc(var(--section-y) / 2);
+  }
+  .intro-inner {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .intro-text {
+    max-width: 620px;
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+  }
+
+  .services {
+    padding-block: calc(var(--section-y) / 2) var(--section-y);
+  }
+  .service-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0 24px;
+  }
+  .section-head a {
+    font-weight: 600;
+    color: var(--forest);
+    margin-bottom: 1.2em;
+  }
+</style>

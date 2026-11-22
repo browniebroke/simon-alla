@@ -1,0 +1,88 @@
+---
+import {hasImage, imageUrl, srcSet} from '../lib/image'
+import type {ServiceSummary} from '../lib/sanity'
+
+interface Props {
+  service: ServiceSummary
+  index: number
+  showImage?: boolean
+}
+const {service, index, showImage = false} = Astro.props
+const image = showImage && hasImage(service.coverImage) ? service.coverImage : undefined
+---
+
+<article class="card">
+  {image && (
+    <img
+      src={imageUrl(image, 600, 400)}
+      srcset={srcSet(image, [400, 600, 900], 2 / 3)}
+      sizes="(max-width: 640px) 100vw, 360px"
+      alt={image.alt ?? ''}
+      width="600"
+      height="400"
+      loading="lazy"
+      decoding="async"
+    />
+  )}
+  <div class="body">
+    <span class="num" aria-hidden="true">
+      {String(index + 1).padStart(2, '0')}
+    </span>
+    <h3>
+      <a href={`/services/${service.slug}/`}>{service.title}</a>
+    </h3>
+    <p>{service.summary}</p>
+  </div>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border-top: 5px solid var(--yellow);
+    height: 100%;
+    overflow: hidden;
+    transition: transform 0.15s ease;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+  }
+  img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+  .body {
+    padding: 28px 24px 24px;
+  }
+  .num {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    color: var(--olive);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--forest);
+    margin-bottom: 0.5em;
+  }
+  /* The whole card is clickable through the title link. */
+  h3 a {
+    text-decoration: none;
+  }
+  h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1rem;
+  }
+</style>

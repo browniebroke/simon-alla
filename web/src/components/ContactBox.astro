@@ -1,0 +1,64 @@
+---
+/** Dark green "get in touch" box, shown at the bottom of most pages. */
+import {telHref} from '../lib/format'
+import {getSettings} from '../lib/sanity'
+
+interface Props {
+  title?: string
+  text?: string
+  buttonLabel?: string
+}
+const settings = await getSettings()
+const {
+  title = 'Un projet ?',
+  text = 'Parlez-moi de votre projet, je vous réponds rapidement.',
+  buttonLabel = 'Me contacter',
+} = Astro.props
+---
+
+<section class="cta-section">
+  <div class="container">
+    <div class="cta">
+      <h2>{title}</h2>
+      <p>{text}</p>
+      <div class="actions">
+        <a class="button button--yellow" href="/contact/">
+          {buttonLabel}
+        </a>
+        <a class="button button--outline" href={telHref(settings.phone)}>
+          {settings.phone}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-section {
+    padding-top: var(--section-y);
+  }
+  .cta {
+    background: var(--forest);
+    color: var(--white);
+    border-radius: calc(var(--radius) * 2);
+    padding: clamp(32px, 6vw, 64px);
+    text-align: center;
+  }
+  h2 {
+    font-family: var(--font-serif);
+    color: var(--yellow);
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-bottom: 0.4em;
+  }
+  p {
+    font-size: 1.15rem;
+    opacity: 0.9;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 24px;
+  }
+</style>

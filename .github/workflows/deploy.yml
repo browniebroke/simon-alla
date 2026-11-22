@@ -1,0 +1,51 @@
+name: Deploy site
+
+# Builds the Astro site from Sanity content and deploys it to Cloudflare Workers.
+# Runs on pushes that touch the site, by hand from the Actions tab, and when
+# Simon publishes in Sanity: a Sanity webhook calls the workflow_dispatch API
+# (POST /repos/browniebroke/simon-alla/actions/workflows/deploy.yml/dispatches).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.nvmrc'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+# One deploy at a time. A burst of publishes queues a single extra run:
+# GitHub replaces the pending run with the newest one.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci --workspace web
+
+      - name: Build
+        run: npm run build --workspace web
+        env:
+          # Falls back to Cloudflare's always-passing test key until the real widget exists.
+          PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA' }}
+
+      - name: Deploy
+        working-directory: web
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

@@ -2,20 +2,24 @@
 
 Website for Simon Alla's stone and landscaping business. The site is in French: a static Astro site hosted on Cloudflare, with content edited in Sanity Studio.
 
-See [`docs/plan.html`](docs/plan.html) for the full plan (architecture, design system, content model, build phases).
-
 ## Repository layout
 
 An npm workspaces monorepo:
 
-| Folder | What | Deployed to |
-| --- | --- | --- |
-| [`web/`](web) | Astro site (`@simon-alla/web`) | Cloudflare Pages |
-| [`studio/`](studio) | Sanity Studio (`@simon-alla/studio`) | `*.sanity.studio` |
-| [`docs/`](docs) | Plan and project docs | — |
-| `assets/` | Brand source files (flyer, business card, logo); git-ignored | — |
+| Folder              | What                                                         | Deployed to        |
+| ------------------- | ------------------------------------------------------------ | ------------------ |
+| [`web/`](web)       | Astro site (`@simon-alla/web`)                               | Cloudflare Workers |
+| [`studio/`](studio) | Sanity Studio (`@simon-alla/studio`)                         | `*.sanity.studio`  |
+| `assets/`           | Brand source files (flyer, business card, logo); git-ignored | —                  |
 
-Both packages are empty stubs for now; they get scaffolded in phase 1 of the plan.
+The site is static: pages are built from Sanity content at build time. The only server code is the contact form endpoint (`web/src/pages/api/contact.ts`). Seed content from the flyer: `npm run seed -w studio`.
+
+Sanity project: `md9oxzrq`, dataset `production` (public). Manage it at <https://www.sanity.io/manage/project/md9oxzrq>.
+
+Live:
+
+- Site: <https://simonalla.fr>
+- Studio: <https://simon-alla.sanity.studio>
 
 ## Requirements
 
@@ -26,6 +30,7 @@ Both packages are empty stubs for now; they get scaffolded in phase 1 of the pla
 
 ```sh
 npm install          # installs dependencies for every workspace
+cp web/.dev.vars.example web/.dev.vars   # local secrets: Turnstile test key, email dry run
 npm run dev:web      # Astro dev server
 npm run dev:studio   # Sanity Studio dev server
 ```
@@ -37,7 +42,86 @@ npm install <package> -w web
 npm install <package> -w studio
 ```
 
+## Quality checks
+
+```sh
+npm run format   # Prettier (with prettier-plugin-astro), whole repo
+npm run check    # format check + ESLint + type checks (astro check, tsc, Sanity schema)
+```
+
+- ESLint: `web/` uses typescript-eslint, eslint-plugin-astro and its accessibility rules (eslint-plugin-jsx-a11y-x); `studio/` uses Sanity's preset.
+- CI runs `check` and builds both packages on pull requests and pushes to `main`.
+- Dependabot opens one grouped PR a week for minor/patch npm updates, and monthly for GitHub Actions.
+
 ## Deployment
 
-- **Site:** Cloudflare Pages builds from the repo root with `npm run build:web`, output directory `web/dist`. Publishing in Sanity triggers a rebuild through a deploy hook.
+- **Site:** a Cloudflare Worker (`simon-alla`) serving the static pages, plus the `/api/contact` route. Config: [`web/wrangler.jsonc`](web/wrangler.jsonc). Deployed by GitHub Actions ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)):
+  - on pushes to `main` that touch `web/`, the root `package*.json` or `.nvmrc`;
+  - when Simon publishes in Sanity: a Sanity webhook triggers the workflow through GitHub's `workflow_dispatch` API;
+  - by hand, from the Actions tab.
+- **Contact form settings:**
+  - `CONTACT_FROM_EMAIL` in `wrangler.jsonc`: sender address, on a domain onboarded with `npx wrangler email sending enable <domain>`.
+  - `TURNSTILE_SECRET_KEY`: secret, set with `npx wrangler secret put TURNSTILE_SECRET_KEY` (from `web/`).
+  - `PUBLIC_TURNSTILE_SITE_KEY`: GitHub Actions repository **variable**, used at build time (defaults to Cloudflare's test key).
+  - The recipient is the email set on the Contact page in Sanity, or the site email.
 - **Studio:** `npm run deploy:studio` (runs `sanity deploy`).
+- **Manual site deploy** (normally done by GitHub Actions): `npm run deploy -w web`. If `CLOUDFLARE_API_TOKEN` is set in your shell, unset it first so wrangler uses your login; `account_id` in `wrangler.jsonc` pins the account either way.
+- **Backups:** [`.github/workflows/sanity-backup.yml`](.github/workflows/sanity-backup.yml) exports the dataset (documents, drafts and images) on the 1st of each month, encrypts it with GnuPG (AES-256, passphrase in the `BACKUP_PASSPHRASE` secret) and attaches it to a GitHub release. Needs a read-only Sanity token in `SANITY_AUTH_TOKEN`. To restore, download `sanity-production.tar.gz.gpg` from the release, then:
+
+  ```sh
+  gpg --decrypt --output sanity-production.tar.gz sanity-production.tar.gz.gpg   # asks for the passphrase
+  npx sanity datasets import sanity-production.tar.gz production --replace        # from studio/
+  ```
+
+## Setup checklist
+
+One-off steps done outside the repo. Tick them off as they're done.
+
+- [x] Sanity project and Studio deployed (`simon-alla.sanity.studio`)
+- [x] Worker `simon-alla` created (first deploy by hand to workers.dev)
+- [x] GitHub secret `CLOUDFLARE_API_TOKEN`: account-owned Cloudflare API token, "Edit Cloudflare Workers" template, scoped to Bruno Alla's Account
+- [x] GitHub secret `SANITY_AUTH_TOKEN`: read-only (Viewer) Sanity token, for the monthly backup
+- [x] GitHub secret `BACKUP_PASSPHRASE`: long random passphrase that encrypts the backups; keep a copy in your password manager
+- [x] Sanity webhook → GitHub (see below), with a fine-grained GitHub token stored in the webhook's headers
+- [x] Turnstile widget for the workers.dev hostname and `simonalla.fr`; site key in the GitHub variable `PUBLIC_TURNSTILE_SITE_KEY`, secret with `npx wrangler secret put TURNSTILE_SECRET_KEY` (from `web/`)
+- [x] Buy `simonalla.fr` (OVH; Cloudflare Registrar doesn't sell `.fr`), add it to Cloudflare as a zone, switch its nameservers
+- [x] Zone `simonalla.fr` active on Cloudflare (waiting for the `.fr` registry to publish the nameservers)
+- [x] Custom domain `simonalla.fr` on the Worker
+- [x] `www.simonalla.fr` → `simonalla.fr`: proxied `www` AAAA record (`100::`) + Redirect Rule (301, keeps path and query); "Always Use HTTPS" on for `http://`
+- [ ] Contact form email (**on hold until Simon can access his inbox**). Cloudflare Email Sending needs Workers Paid, but sending to _verified_ addresses through Email Routing is free:
+  1. Dashboard → `simonalla.fr` → Email → Email Routing: enable it and accept the DNS records.
+  2. Add `simonalla9@gmail.com` as a destination address; Simon clicks the verification link in his inbox.
+  3. Optional: routing rule `contact@simonalla.fr` → `simonalla9@gmail.com`.
+  4. Then: set `CONTACT_FROM_EMAIL` to `site@simonalla.fr` and `allowed_sender_addresses` on the `send_email` binding in `web/wrangler.jsonc`, note in Studio that the recipient must be a verified address, deploy, send a real test through the form. If Cloudflare refuses to send from a routing-only domain, fall back to Resend's free plan or Workers Paid ($5/month).
+- [ ] Invite Simon to the Sanity project as an editor
+
+### Sanity webhook → GitHub Actions
+
+In sanity.io/manage → project → API → Webhooks → Create:
+
+| Setting      | Value                                                                                          |
+| ------------ | ---------------------------------------------------------------------------------------------- |
+| URL          | `https://api.github.com/repos/browniebroke/simon-alla/actions/workflows/deploy.yml/dispatches` |
+| Dataset      | `production`                                                                                   |
+| Trigger on   | Create, Update, Delete                                                                         |
+| Filter       | _(empty: every published document)_                                                            |
+| Projection   | `{"ref": "main"}`                                                                              |
+| HTTP method  | `POST`                                                                                         |
+| HTTP headers | `Authorization: Bearer <token>` and `Accept: application/vnd.github+json`                      |
+
+The token is a GitHub fine-grained personal access token limited to this repository, with **Actions: read and write** only. It can start workflows but not change code. Keep it only in the webhook settings, and note its expiry date: the webhook stops working when it expires. GitHub answers `204 No Content` when the call works; the webhook's attempt log in Sanity shows failures.
+
+## Next steps
+
+- **SEO and legal:** `LocalBusiness` JSON-LD from the site settings, `@astrojs/sitemap` and `robots.txt` (needs `site: 'https://simonalla.fr'` in the Astro config), canonical URLs. Write the Mentions légales (LCEN: name, legal status, SIRET, address, publication director, host) and Confidentialité pages in Studio. Lighthouse and accessibility pass.
+- **Handover:** invite Simon to Sanity as an editor, write a one-page guide in French ("Ajouter une réalisation", "Changer une photo"), walk him through it.
+- **Later:** photo uploads in the contact form, filtering projects by service, Cloudflare Web Analytics.
+
+### Open questions for Simon
+
+- Legal status, SIRET and business address (for the Mentions légales).
+- Area served: home town and how far he travels.
+- The designer's source files: logo with a transparent background, exact colours, background photos.
+- Licences for the flyer photos, and photos of his own work.
+- Which email he'll use to log in to Sanity, and which one receives form messages.
+- Opening hours or availability to show, if any.

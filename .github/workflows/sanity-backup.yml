@@ -1,0 +1,60 @@
+name: Sanity backup
+
+# Monthly export of the Sanity dataset (documents, drafts and images), encrypted
+# with a passphrase and stored as a GitHub release asset. Releases are public if
+# the repo is, hence the encryption: drafts can hold unpublished personal details.
+#
+# Secrets: SANITY_AUTH_TOKEN (read-only Sanity token) and BACKUP_PASSPHRASE
+# (keep a copy in a password manager: without it the backups can't be read).
+# Restore: see "Backups" in the README.
+
+on:
+  schedule:
+    - cron: '0 3 1 * *' # 03:00 UTC on the 1st of each month
+  workflow_dispatch:
+
+permissions:
+  contents: write # to create the release
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci --workspace studio
+
+      - name: Export dataset
+        working-directory: studio
+        env:
+          SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+        run: npx sanity datasets export production "$RUNNER_TEMP/sanity-production.tar.gz" --overwrite
+
+      - name: Encrypt
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::error::BACKUP_PASSPHRASE secret is not set; refusing to publish an unencrypted backup."
+            exit 1
+          fi
+          printf '%s' "$BACKUP_PASSPHRASE" |
+            gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+              --symmetric --cipher-algo AES256 \
+              --output "$RUNNER_TEMP/sanity-production.tar.gz.gpg" "$RUNNER_TEMP/sanity-production.tar.gz"
+          rm "$RUNNER_TEMP/sanity-production.tar.gz"
+
+      - name: Publish as a release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="backup-$(date -u +%Y-%m-%d)"
+          gh release create "$tag" "$RUNNER_TEMP/sanity-production.tar.gz.gpg" \
+            --title "Sanity backup $(date -u +%Y-%m-%d)" \
+            --notes "Encrypted export of the production dataset. To restore, see Backups in the README." \
+            --latest=false

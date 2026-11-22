@@ -1,0 +1,26 @@
+---
+import ContactBox from '../../components/ContactBox.astro'
+import PageHeader from '../../components/PageHeader.astro'
+import ProjectGrid from '../../components/ProjectGrid.astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import {getProjects, getSettings} from '../../lib/sanity'
+
+const [settings, projects] = await Promise.all([getSettings(), getProjects()])
+---
+
+<BaseLayout
+  title="Réalisations"
+  description={`Quelques réalisations de ${settings.name} : ${settings.tagline ?? ''}.`}
+>
+  <PageHeader title="Réalisations" lead="Quelques chantiers récents, en images." />
+  <section class="container list">
+    <ProjectGrid projects={projects} />
+  </section>
+  <ContactBox />
+</BaseLayout>
+
+<style>
+  .list {
+    padding-top: calc(var(--section-y) / 2);
+  }
+</style>

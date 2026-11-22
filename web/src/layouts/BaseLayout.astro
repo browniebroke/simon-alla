@@ -1,0 +1,66 @@
+---
+import '@fontsource-variable/jost'
+import '@fontsource/playfair-display/700.css'
+import '../styles/global.css'
+import CallButton from '../components/CallButton.astro'
+import SiteFooter from '../components/SiteFooter.astro'
+import SiteHeader from '../components/SiteHeader.astro'
+import {hasImage, imageUrl} from '../lib/image'
+import {getSettings, type Photo, type Seo} from '../lib/sanity'
+
+interface Props {
+  /** Page title; the site name is appended unless `fullTitle` is set. */
+  title?: string
+  fullTitle?: string
+  description?: string
+  image?: Photo
+  seo?: Seo
+}
+const settings = await getSettings()
+const {title, fullTitle, description, image, seo} = Astro.props
+
+const siteTitle = [settings.name, settings.tagline].filter(Boolean).join(' — ')
+const pageTitle = seo?.title ?? fullTitle ?? (title ? `${title} — ${settings.name}` : siteTitle)
+const pageDescription = seo?.description ?? description ?? settings.seoDescription
+const shareImage = [seo?.image, image, settings.shareImage, settings.logo].find(hasImage)
+const shareImageUrl = shareImage && imageUrl(shareImage, 1200, 630)
+const canonical = new URL(Astro.url.pathname, Astro.site)
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    {pageDescription && <meta name="description" content={pageDescription} />}
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content={settings.name} />
+    <meta property="og:title" content={pageTitle} />
+    {pageDescription && <meta property="og:description" content={pageDescription} />}
+    {shareImageUrl && <meta property="og:image" content={shareImageUrl} />}
+    <meta name="twitter:card" content={shareImageUrl ? 'summary_large_image' : 'summary'} />
+    <meta name="theme-color" content="#1e2d16" />
+    <!-- Icons generated from Simon's logo (assets/logo.jpeg). Google wants a multiple of 48px. -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://cdn.sanity.io" />
+    <meta name="generator" content={Astro.generator} />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="visually-hidden skip-link" href="#contenu">
+      Aller au contenu
+    </a>
+    <SiteHeader settings={settings} />
+    <main id="contenu">
+      <slot />
+    </main>
+    <SiteFooter settings={settings} />
+    <CallButton phone={settings.phone} />
+  </body>
+</html>

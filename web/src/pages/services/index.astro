@@ -1,0 +1,40 @@
+---
+import ContactBox from '../../components/ContactBox.astro'
+import PageHeader from '../../components/PageHeader.astro'
+import ServiceCard from '../../components/ServiceCard.astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import {getServices, getSettings} from '../../lib/sanity'
+
+const [settings, services] = await Promise.all([getSettings(), getServices()])
+---
+
+<BaseLayout
+  title="Services"
+  description={`Les services de ${settings.name} : ${services.map((s) => s.title.toLowerCase()).join(', ')}.`}
+>
+  <PageHeader title="Les services" lead={settings.tagline} />
+  <section class="container list">
+    <ul>
+      {services.map((s, i) => (
+        <li>
+          <ServiceCard service={s} index={i} showImage />
+        </li>
+      ))}
+    </ul>
+  </section>
+  <ContactBox />
+</BaseLayout>
+
+<style>
+  .list {
+    padding-top: calc(var(--section-y) / 2);
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+</style>

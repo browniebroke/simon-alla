@@ -1,0 +1,246 @@
+---
+import {PUBLIC_TURNSTILE_SITE_KEY} from 'astro:env/client'
+
+interface Props {
+  services: string[]
+  privacyHref?: string
+}
+const {services, privacyHref} = Astro.props
+---
+
+<form id="formulaire" class="form" method="post" action="/api/contact" novalidate>
+  <div class="status" role="alert" aria-live="polite" hidden></div>
+
+  <div class="grid">
+    <label>
+      <span>
+        Nom <abbr title="obligatoire">*</abbr>
+      </span>
+      <input name="name" autocomplete="name" required maxlength="100" />
+      <small class="error" data-for="name"></small>
+    </label>
+    <label>
+      <span>Commune</span>
+      <input name="town" autocomplete="address-level2" maxlength="100" />
+    </label>
+    <label>
+      <span>E-mail</span>
+      <input name="email" type="email" autocomplete="email" maxlength="200" />
+      <small class="error" data-for="email"></small>
+    </label>
+    <label>
+      <span>Téléphone</span>
+      <input name="phone" type="tel" autocomplete="tel" maxlength="30" />
+      <small class="error" data-for="phone"></small>
+    </label>
+    <label class="wide">
+      <span>Type de projet</span>
+      <select name="projectType">
+        <option value="">Choisir…</option>
+        {services.map((s) => (
+          <option>{s}</option>
+        ))}
+        <option>Autre</option>
+      </select>
+    </label>
+    <label class="wide">
+      <span>
+        Votre message <abbr title="obligatoire">*</abbr>
+      </span>
+      <textarea name="message" rows="6" required maxlength="5000"></textarea>
+      <small class="error" data-for="message"></small>
+    </label>
+  </div>
+
+  <!-- Honeypot: hidden from visitors, filled only by spam bots. -->
+  <label class="honeypot" aria-hidden="true">
+    Site web <input name="website" tabindex="-1" autocomplete="off" />
+  </label>
+
+  <p class="hint">Indiquez au moins un e-mail ou un téléphone pour que je puisse vous répondre.</p>
+
+  <div
+    class="cf-turnstile"
+    data-sitekey={PUBLIC_TURNSTILE_SITE_KEY}
+    data-action="contact"
+    data-language="fr"
+  ></div>
+
+  <button class="button button--yellow" type="submit">
+    Envoyer le message
+  </button>
+
+  <p class="privacy">
+    Vos coordonnées servent uniquement à répondre à votre demande.
+    {privacyHref && <a href={privacyHref}>En savoir plus</a>}
+  </p>
+  <noscript>
+    <p class="status error-box">
+      Le formulaire nécessite JavaScript. Vous pouvez aussi m’appeler ou m’écrire directement.
+    </p>
+  </noscript>
+</form>
+
+<script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('#formulaire')!
+  const status = form.querySelector<HTMLElement>('.status')!
+  const button = form.querySelector<HTMLButtonElement>('button[type=submit]')!
+
+  const showStatus = (message: string, kind: 'error' | 'success') => {
+    status.textContent = message
+    status.className = `status ${kind}-box`
+    status.hidden = false
+    status.scrollIntoView({behavior: 'smooth', block: 'center'})
+  }
+
+  // Coming back from a submission without JavaScript (see /api/contact).
+  if (new URLSearchParams(location.search).has('erreur')) {
+    showStatus('Le message n’a pas pu être envoyé. Vérifiez le formulaire et réessayez.', 'error')
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    form.querySelectorAll<HTMLElement>('.error').forEach((el) => (el.textContent = ''))
+    status.hidden = true
+    button.disabled = true
+    button.textContent = 'Envoi…'
+
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {Accept: 'application/json'},
+      })
+      const result = (await res.json()) as {
+        ok: boolean
+        error?: string
+        fields?: Record<string, string>
+      }
+      if (result.ok) {
+        location.assign('/contact/merci/')
+        return
+      }
+      for (const [field, message] of Object.entries(result.fields ?? {})) {
+        const el = form.querySelector<HTMLElement>(`.error[data-for="${field}"]`)
+        if (el) el.textContent = message
+      }
+      showStatus(result.error ?? 'Le message n’a pas pu être envoyé.', 'error')
+    } catch {
+      showStatus('Connexion impossible. Vérifiez votre connexion et réessayez.', 'error')
+    } finally {
+      // A Turnstile token can only be used once.
+      ;(window as unknown as {turnstile?: {reset: () => void}}).turnstile?.reset()
+      button.disabled = false
+      button.textContent = 'Envoyer le message'
+    }
+  })
+</script>
+
+<style>
+  .form {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: clamp(20px, 4vw, 40px);
+    display: grid;
+    gap: 20px;
+    scroll-margin-top: 24px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 20px;
+  }
+  @media (max-width: 600px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .wide {
+    grid-column: 1 / -1;
+  }
+  label {
+    display: grid;
+    gap: 6px;
+  }
+  label span {
+    font-weight: 600;
+    color: var(--forest);
+  }
+  abbr {
+    text-decoration: none;
+    color: #a14d00;
+  }
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: var(--ink);
+    background: var(--paper);
+    border: 2px solid var(--stone);
+    border-radius: 10px;
+    padding: 0.65em 0.8em;
+    width: 100%;
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--olive);
+    background: var(--white);
+  }
+  textarea {
+    resize: vertical;
+  }
+  .error {
+    color: #a3261f;
+    font-size: 0.9rem;
+    min-height: 0;
+  }
+  .error:empty {
+    display: none;
+  }
+  .hint,
+  .privacy {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .privacy a {
+    color: var(--forest);
+  }
+  button {
+    justify-self: start;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+  }
+  button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+  .honeypot {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .status {
+    margin: 0;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  :global(.error-box) {
+    background: #fbeceb;
+    color: #8a1f19;
+  }
+  :global(.success-box) {
+    background: #e8f2dc;
+    color: var(--forest);
+  }
+</style>

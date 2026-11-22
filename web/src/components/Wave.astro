@@ -1,0 +1,38 @@
+---
+/**
+ * Wavy divider between two sections, as on the flyer.
+ * `above` fills the wave, `below` is the next section's background,
+ * `accent` draws a stripe under the wave edge (the flyer's yellow band).
+ */
+interface Props {
+  above: string
+  below: string
+  accent?: string
+  flip?: boolean
+}
+const {above, below, accent, flip = false} = Astro.props
+---
+
+<div class="wave" class:list={{flip}} style={`background:${below}`} aria-hidden="true">
+  <svg viewBox="0 0 1440 96" preserveAspectRatio="none">
+    {accent && (
+      <path d="M0 0H1440V58C1180 102 930 96 700 66S250 30 0 78Z" style={`fill:${accent}`} />
+    )}
+    <path d="M0 0H1440V40C1180 84 930 78 700 48S250 12 0 60Z" style={`fill:${above}`} />
+  </svg>
+</div>
+
+<style>
+  .wave {
+    line-height: 0;
+    margin-top: -1px;
+  }
+  .wave svg {
+    display: block;
+    width: 100%;
+    height: clamp(40px, 7vw, 96px);
+  }
+  .flip svg {
+    transform: scaleX(-1);
+  }
+</style>

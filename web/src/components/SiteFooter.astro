@@ -1,0 +1,108 @@
+---
+import {telHref} from '../lib/format'
+import type {SiteSettings} from '../lib/sanity'
+
+interface Props {
+  settings: SiteSettings
+}
+const {settings} = Astro.props
+const year = new Date().getFullYear()
+---
+
+<footer class="footer">
+  <svg class="hills" viewBox="0 0 1440 140" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 140V70C260 10 520 0 760 40S1180 110 1440 60V140Z" style="fill:var(--olive)"></path>
+    <path
+      d="M0 140V105C300 60 620 70 900 98S1260 120 1440 96V140Z"
+      style="fill:var(--forest)"
+    ></path>
+  </svg>
+  <svg class="grass" viewBox="0 0 120 70" aria-hidden="true">
+    <path
+      d="M4 70C10 48 14 34 12 18 22 34 24 50 22 70ZM20 70C30 44 40 26 56 10 46 30 40 50 40 70ZM36 70C42 50 52 36 66 28 58 44 54 58 54 70ZM50 70C54 46 56 26 52 4 64 26 66 50 64 70ZM62 70C70 52 82 38 100 30 86 46 80 58 80 70ZM76 70C84 56 98 46 116 44 102 54 96 62 94 70Z"
+      style="fill:var(--forest)"
+    ></path>
+  </svg>
+  <div class="body">
+    <div class="container">
+      <p class="contact">
+        <a href={telHref(settings.phone)}>{settings.phone}</a>
+        <span aria-hidden="true"> / </span>
+        <a href={`mailto:${settings.email}`}>{settings.email}</a>
+      </p>
+      {settings.serviceArea && <p class="area">{settings.serviceArea}</p>}
+      <p class="legal">
+        © {year} {settings.name}
+        {settings.tagline && ` · ${settings.tagline}`}
+        {settings.pages.map((p) => (
+          <>
+            {' · '}
+            <a href={`/${p.slug}/`}>{p.title}</a>
+          </>
+        ))}
+        {settings.socialLinks?.map((s) => (
+          <>
+            {' · '}
+            <a href={s.url} rel="noopener noreferrer">
+              {s.label}
+            </a>
+          </>
+        ))}
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    margin-top: var(--section-y);
+  }
+  .hills {
+    display: block;
+    width: 100%;
+    height: clamp(60px, 10vw, 140px);
+  }
+  .grass {
+    position: absolute;
+    right: 6%;
+    top: clamp(4px, 2vw, 30px);
+    width: clamp(70px, 9vw, 120px);
+  }
+  .body {
+    background: var(--forest);
+    color: var(--white);
+    text-align: center;
+    padding: 8px 0 40px;
+    margin-top: -1px;
+  }
+  .contact {
+    font-size: 1.15rem;
+    letter-spacing: 0.02em;
+  }
+  .contact a {
+    text-decoration: none;
+  }
+  .contact a:hover {
+    color: var(--yellow);
+  }
+  .area {
+    opacity: 0.85;
+  }
+  .legal a {
+    text-decoration: none;
+  }
+  .legal a:hover {
+    text-decoration: underline;
+  }
+  .legal {
+    font-size: 0.875rem;
+    opacity: 0.7;
+    margin: 0;
+  }
+  @media (max-width: 720px) {
+    .body {
+      padding-bottom: 96px; /* room for the sticky call button */
+    }
+  }
+</style>
