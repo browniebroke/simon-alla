@@ -1,13 +1,11 @@
 ---
 import ContactBox from '../../components/ContactBox.astro'
 import PageHeader from '../../components/PageHeader.astro'
-import ServiceCard from '../../components/ServiceCard.astro'
+import ServiceGrid from '../../components/ServiceGrid.astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import {balancedColumns} from '../../lib/grid'
 import {getServices, getSettings} from '../../lib/sanity'
 
 const [settings, services] = await Promise.all([getSettings(), getServices()])
-const columns = balancedColumns(services.length)
 ---
 
 <BaseLayout
@@ -16,13 +14,7 @@ const columns = balancedColumns(services.length)
 >
   <PageHeader title="Les services" lead={settings.tagline} />
   <section class="container list">
-    <ul style={`--columns: ${columns}`}>
-      {services.map((s, i) => (
-        <li>
-          <ServiceCard service={s} index={i} showImage />
-        </li>
-      ))}
-    </ul>
+    <ServiceGrid services={services} showImages />
   </section>
   <ContactBox />
 </BaseLayout>
@@ -30,24 +22,5 @@ const columns = balancedColumns(services.length)
 <style>
   .list {
     padding-top: calc(var(--section-y) / 2);
-  }
-  ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-  /* Tablets: at most 2 per row. Desktop: 2 or 3, picked for balanced rows (lib/grid.ts). */
-  @media (min-width: 640px) {
-    ul {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-  @media (min-width: 960px) {
-    ul {
-      grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
-    }
   }
 </style>

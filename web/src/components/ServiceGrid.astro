@@ -1,0 +1,45 @@
+---
+/**
+ * Service cards in balanced rows: 2 or 3 per row on desktop depending on the count
+ * (see lib/grid.ts), 2 on tablets, 1 on phones.
+ */
+import {balancedColumns} from '../lib/grid'
+import type {ServiceSummary} from '../lib/sanity'
+import ServiceCard from './ServiceCard.astro'
+
+interface Props {
+  services: ServiceSummary[]
+  showImages?: boolean
+}
+const {services, showImages = false} = Astro.props
+const columns = balancedColumns(services.length)
+---
+
+<ul style={`--columns: ${columns}`}>
+  {services.map((service, i) => (
+    <li>
+      <ServiceCard service={service} index={i} showImage={showImages} />
+    </li>
+  ))}
+</ul>
+
+<style>
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  @media (min-width: 640px) {
+    ul {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 960px) {
+    ul {
+      grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+    }
+  }
+</style>
