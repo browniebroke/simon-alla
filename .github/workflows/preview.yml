@@ -1,0 +1,88 @@
+name: Preview
+
+# Deploys each pull request as a Workers Preview (pr-<n>-simon-alla.<subdomain>.workers.dev),
+# comments the URL on the PR, and deletes the Preview when the PR is closed.
+# Previews use the `previews` settings in web/wrangler.jsonc: Turnstile test keys and no
+# real email. Forks and Dependabot don't get repository secrets, so they're skipped.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+  pull-requests: write # to comment the preview URL
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  PREVIEW_NAME: pr-${{ github.event.pull_request.number }}
+
+jobs:
+  preview:
+    if: >-
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci --workspace web
+
+      - name: Build
+        run: npm run build --workspace web
+        env:
+          # Cloudflare's always-passing test site key, matching the previews' test secret.
+          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+
+      - name: Deploy preview
+        id: preview
+        working-directory: web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -o pipefail
+          npx wrangler preview --name "$PREVIEW_NAME" \
+            --message "PR #${{ github.event.pull_request.number }} @ ${{ github.event.pull_request.head.sha }}" \
+            --json | tee "$RUNNER_TEMP/preview.json"
+          url=$(jq -er '.preview.urls[0]' "$RUNNER_TEMP/preview.json")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Comment the preview URL
+        env:
+          GH_TOKEN: ${{ github.token }}
+          URL: ${{ steps.preview.outputs.url }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --repo "$GITHUB_REPOSITORY" \
+            --edit-last --create-if-none \
+            --body "Preview: $URL (commit ${{ github.event.pull_request.head.sha }}). The contact form logs messages instead of sending them."
+
+  cleanup:
+    if: >-
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci --workspace web
+
+      - name: Delete preview
+        working-directory: web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler preview delete --name "$PREVIEW_NAME" --skip-confirmation
