@@ -75,8 +75,8 @@ One-off steps done outside the repo. Tick them off as they're done.
 - [x] Sanity project and Studio deployed (`simon-alla.sanity.studio`)
 - [x] Worker `simon-alla` created (first deploy by hand to workers.dev)
 - [x] GitHub secret `CLOUDFLARE_API_TOKEN`: account-owned Cloudflare API token, "Edit Cloudflare Workers" template, scoped to Bruno Alla's Account
-- [ ] GitHub secret `SANITY_AUTH_TOKEN`: read-only (Viewer) Sanity token, for the monthly backup
-- [ ] Sanity webhook → GitHub (see below), with a fine-grained GitHub token stored in the webhook's headers
+- [x] GitHub secret `SANITY_AUTH_TOKEN`: read-only (Viewer) Sanity token, for the monthly backup
+- [x] Sanity webhook → GitHub (see below), with a fine-grained GitHub token stored in the webhook's headers
 - [x] Turnstile widget for the workers.dev hostname and `simonalla.fr`; site key in the GitHub variable `PUBLIC_TURNSTILE_SITE_KEY`, secret with `npx wrangler secret put TURNSTILE_SECRET_KEY` (from `web/`)
 - [x] Buy `simonalla.fr` (OVH; Cloudflare Registrar doesn't sell `.fr`), add it to Cloudflare as a zone, switch its nameservers
 - [x] Zone `simonalla.fr` active on Cloudflare (waiting for the `.fr` registry to publish the nameservers)
