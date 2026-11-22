@@ -81,7 +81,7 @@ One-off steps done outside the repo. Tick them off as they're done.
 - [x] Worker `simon-alla` created (first deploy by hand to workers.dev)
 - [x] GitHub secret `CLOUDFLARE_API_TOKEN`: account-owned Cloudflare API token, "Edit Cloudflare Workers" template, scoped to Bruno Alla's Account
 - [x] GitHub secret `SANITY_AUTH_TOKEN`: read-only (Viewer) Sanity token, for the monthly backup
-- [ ] GitHub secret `BACKUP_PASSPHRASE`: long random passphrase that encrypts the backups; keep a copy in your password manager
+- [x] GitHub secret `BACKUP_PASSPHRASE`: long random passphrase that encrypts the backups; keep a copy in your password manager
 - [x] Sanity webhook → GitHub (see below), with a fine-grained GitHub token stored in the webhook's headers
 - [x] Turnstile widget for the workers.dev hostname and `simonalla.fr`; site key in the GitHub variable `PUBLIC_TURNSTILE_SITE_KEY`, secret with `npx wrangler secret put TURNSTILE_SECRET_KEY` (from `web/`)
 - [x] Buy `simonalla.fr` (OVH; Cloudflare Registrar doesn't sell `.fr`), add it to Cloudflare as a zone, switch its nameservers
