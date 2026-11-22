@@ -24,6 +24,7 @@ const pageTitle = seo?.title ?? fullTitle ?? (title ? `${title} — ${settings.n
 const pageDescription = seo?.description ?? description ?? settings.seoDescription
 const shareImage = [seo?.image, image, settings.shareImage, settings.logo].find(hasImage)
 const shareImageUrl = shareImage && imageUrl(shareImage, 1200, 630)
+const canonical = new URL(Astro.url.pathname, Astro.site)
 ---
 
 <!doctype html>
@@ -33,12 +34,15 @@ const shareImageUrl = shareImage && imageUrl(shareImage, 1200, 630)
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     {pageDescription && <meta name="description" content={pageDescription} />}
+    <link rel="canonical" href={canonical} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
     <meta property="og:locale" content="fr_FR" />
     <meta property="og:site_name" content={settings.name} />
     <meta property="og:title" content={pageTitle} />
     {pageDescription && <meta property="og:description" content={pageDescription} />}
     {shareImageUrl && <meta property="og:image" content={shareImageUrl} />}
+    <meta name="twitter:card" content={shareImageUrl ? 'summary_large_image' : 'summary'} />
     <meta name="theme-color" content="#1e2d16" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://cdn.sanity.io" />

@@ -1,10 +1,15 @@
 // @ts-check
 import cloudflare from '@astrojs/cloudflare'
+import sitemap from '@astrojs/sitemap'
 import {defineConfig, envField} from 'astro/config'
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://simonalla.fr',
+  integrations: [
+    // /sitemap-index.xml, linked from /robots.txt. The thank-you page isn't worth indexing.
+    sitemap({filter: (page) => !page.includes('/contact/merci/')}),
+  ],
   // Every page is prerendered at build time; only /api/contact runs on the Worker.
   adapter: cloudflare({
     // Photos come resized from the Sanity CDN: no Cloudflare Images binding needed.

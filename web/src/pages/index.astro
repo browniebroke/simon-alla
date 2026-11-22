@@ -8,6 +8,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import {splitName, telHref} from '../lib/format'
 import {hasImage, imageUrl} from '../lib/image'
 import {renderRichText} from '../lib/portableText'
+import {businessJsonLd} from '../lib/structuredData'
 import {getHomePage, getSettings} from '../lib/sanity'
 
 const [settings, home] = await Promise.all([getSettings(), getHomePage()])
@@ -15,12 +16,14 @@ const [first, last] = splitName(home.heroTitle ?? settings.name)
 const subtitle = home.heroSubtitle ?? settings.tagline
 const heroPhoto = hasImage(home.heroPhoto) ? home.heroPhoto : undefined
 const logo = hasImage(settings.logo) ? settings.logo : undefined
+const jsonLd = businessJsonLd(settings, home.services, Astro.site!)
 const background = hasImage(home.heroBackground)
   ? `--hero-bg: url('${imageUrl(home.heroBackground, 1920, 1000)}')`
   : undefined
 ---
 
 <BaseLayout seo={home.seo}>
+  <script slot="head" is:inline type="application/ld+json" set:html={jsonLd} />
   <section class="hero" class:list={{'has-bg': background}} style={background}>
     <div class="container hero-inner">
       <div class="hero-text">

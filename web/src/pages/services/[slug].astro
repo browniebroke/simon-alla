@@ -6,7 +6,7 @@ import ProjectGrid from '../../components/ProjectGrid.astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import {hasImage, imageUrl, srcSet} from '../../lib/image'
 import {renderRichText} from '../../lib/portableText'
-import {getServicesFull, type Service} from '../../lib/sanity'
+import {getServicesFull, getSettings, type Service} from '../../lib/sanity'
 
 export async function getStaticPaths() {
   const services = await getServicesFull()
@@ -15,9 +15,11 @@ export async function getStaticPaths() {
 
 const {service} = Astro.props as {service: Service}
 const cover = hasImage(service.coverImage) ? service.coverImage : undefined
+const {city} = await getSettings()
+const pageTitle = city ? `${service.title} à ${city}` : service.title
 ---
 
-<BaseLayout title={service.title} description={service.summary} image={cover} seo={service.seo}>
+<BaseLayout title={pageTitle} description={service.summary} image={cover} seo={service.seo}>
   <PageHeader
     title={service.title}
     lead={service.summary}
