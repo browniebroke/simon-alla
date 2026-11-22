@@ -1,6 +1,6 @@
 ---
 /** Dark green "get in touch" box, shown at the bottom of most pages. */
-import {telHref} from '../lib/format'
+import {frenchSpacing, telHref} from '../lib/format'
 import {getSettings} from '../lib/sanity'
 
 interface Props {
@@ -19,8 +19,8 @@ const {
 <section class="cta-section">
   <div class="container">
     <div class="cta">
-      <h2>{title}</h2>
-      <p>{text}</p>
+      <h2>{frenchSpacing(title)}</h2>
+      <p>{frenchSpacing(text)}</p>
       <div class="actions">
         <a class="button button--yellow" href="/contact/">
           {buttonLabel}

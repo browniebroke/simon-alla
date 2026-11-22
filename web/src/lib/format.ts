@@ -16,3 +16,11 @@ export function splitName(name: string): [string, string] {
   const [first, ...rest] = name.trim().split(/\s+/)
   return [first ?? '', rest.join(' ').toUpperCase()]
 }
+
+/**
+ * French typography: a non-breaking space before : ; ? ! » and after «, so the
+ * punctuation never wraps onto its own line. Ordinary spaces typed in Sanity are fine.
+ */
+export function frenchSpacing(text: string): string {
+  return text.replace(/[ \u00a0]+([:;?!»])/g, '\u00a0$1').replace(/«[ \u00a0]+/g, '«\u00a0')
+}

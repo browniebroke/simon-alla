@@ -1,5 +1,6 @@
 ---
 /** Dark green title band with the yellow-edged wave, used at the top of inner pages. */
+import {frenchSpacing} from '../lib/format'
 import Wave from './Wave.astro'
 
 interface Props {
@@ -14,8 +15,8 @@ const {title, kicker, kickerHref, lead} = Astro.props
 <section class="page-header">
   <div class="container">
     {kicker && <p class="kicker">{kickerHref ? <a href={kickerHref}>{kicker}</a> : kicker}</p>}
-    <h1>{title}</h1>
-    {lead && <p class="lead">{lead}</p>}
+    <h1>{frenchSpacing(title)}</h1>
+    {lead && <p class="lead">{frenchSpacing(lead)}</p>}
     <slot />
   </div>
 </section>
