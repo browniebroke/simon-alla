@@ -59,6 +59,7 @@ npm run check    # format check + ESLint + type checks (astro check, tsc, Sanity
   - on pushes to `main` that touch `web/`, the root `package*.json` or `.nvmrc`;
   - when Simon publishes in Sanity: a Sanity webhook triggers the workflow through GitHub's `workflow_dispatch` API;
   - by hand, from the Actions tab.
+- **Pull request previews:** [`.github/workflows/preview.yml`](.github/workflows/preview.yml) deploys each PR from this repo as a Workers Preview at `pr-<number>-simon-alla.bruno-alla-s-account.workers.dev` (marked noindex by Cloudflare), comments the URL on the PR, and deletes the Preview when the PR closes. Previews use the `previews` block in `wrangler.jsonc`: Turnstile test keys and `EMAIL_DRY_RUN`, so the form works but never sends email. They show the published Sanity content, like production. PRs from forks and Dependabot are skipped (no access to secrets).
 - **Contact form settings:**
   - `CONTACT_FROM_EMAIL` in `wrangler.jsonc`: sender address, on a domain onboarded with `npx wrangler email sending enable <domain>`.
   - `TURNSTILE_SECRET_KEY`: secret, set with `npx wrangler secret put TURNSTILE_SECRET_KEY` (from `web/`).
@@ -93,6 +94,7 @@ One-off steps done outside the repo. Tick them off as they're done.
   2. Add `simonalla9@gmail.com` as a destination address; Simon clicks the verification link in his inbox.
   3. Optional: routing rule `contact@simonalla.fr` → `simonalla9@gmail.com`.
   4. Then: set `CONTACT_FROM_EMAIL` to `site@simonalla.fr` and `allowed_sender_addresses` on the `send_email` binding in `web/wrangler.jsonc`, note in Studio that the recipient must be a verified address, deploy, send a real test through the form. If Cloudflare refuses to send from a routing-only domain, fall back to Resend's free plan or Workers Paid ($5/month).
+- [ ] Previews base secret: `printf '%s' 1x0000000000000000000000000000000AA | npx wrangler preview base-config secret put TURNSTILE_SECRET_KEY` (from `web/`; Cloudflare's public always-passing test secret)
 - [ ] Invite Simon to the Sanity project as an editor
 
 ### Sanity webhook → GitHub Actions
