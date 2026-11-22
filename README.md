@@ -66,7 +66,12 @@ npm run check    # format check + ESLint + type checks (astro check, tsc, Sanity
   - The recipient is the email set on the Contact page in Sanity, or the site email.
 - **Studio:** `npm run deploy:studio` (runs `sanity deploy`).
 - **Manual site deploy** (normally done by GitHub Actions): `npm run deploy -w web`. If `CLOUDFLARE_API_TOKEN` is set in your shell, unset it first so wrangler uses your login; `account_id` in `wrangler.jsonc` pins the account either way.
-- **Backups:** [`.github/workflows/sanity-backup.yml`](.github/workflows/sanity-backup.yml) exports the dataset on the 1st of each month to a GitHub release. Needs a read-only Sanity token in the `SANITY_AUTH_TOKEN` repository secret.
+- **Backups:** [`.github/workflows/sanity-backup.yml`](.github/workflows/sanity-backup.yml) exports the dataset (documents, drafts and images) on the 1st of each month, encrypts it with GnuPG (AES-256, passphrase in the `BACKUP_PASSPHRASE` secret) and attaches it to a GitHub release. Needs a read-only Sanity token in `SANITY_AUTH_TOKEN`. To restore, download `sanity-production.tar.gz.gpg` from the release, then:
+
+  ```sh
+  gpg --decrypt --output sanity-production.tar.gz sanity-production.tar.gz.gpg   # asks for the passphrase
+  npx sanity datasets import sanity-production.tar.gz production --replace        # from studio/
+  ```
 
 ## Setup checklist
 
@@ -76,6 +81,7 @@ One-off steps done outside the repo. Tick them off as they're done.
 - [x] Worker `simon-alla` created (first deploy by hand to workers.dev)
 - [x] GitHub secret `CLOUDFLARE_API_TOKEN`: account-owned Cloudflare API token, "Edit Cloudflare Workers" template, scoped to Bruno Alla's Account
 - [x] GitHub secret `SANITY_AUTH_TOKEN`: read-only (Viewer) Sanity token, for the monthly backup
+- [ ] GitHub secret `BACKUP_PASSPHRASE`: long random passphrase that encrypts the backups; keep a copy in your password manager
 - [x] Sanity webhook → GitHub (see below), with a fine-grained GitHub token stored in the webhook's headers
 - [x] Turnstile widget for the workers.dev hostname and `simonalla.fr`; site key in the GitHub variable `PUBLIC_TURNSTILE_SITE_KEY`, secret with `npx wrangler secret put TURNSTILE_SECRET_KEY` (from `web/`)
 - [x] Buy `simonalla.fr` (OVH; Cloudflare Registrar doesn't sell `.fr`), add it to Cloudflare as a zone, switch its nameservers

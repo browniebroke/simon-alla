@@ -1,8 +1,12 @@
 name: Sanity backup
 
-# Monthly export of the Sanity dataset (documents and images), stored as a
-# GitHub release asset. Needs a read-only Sanity token in the
-# SANITY_AUTH_TOKEN repository secret.
+# Monthly export of the Sanity dataset (documents, drafts and images), encrypted
+# with a passphrase and stored as a GitHub release asset. Releases are public if
+# the repo is, hence the encryption: drafts can hold unpublished personal details.
+#
+# Secrets: SANITY_AUTH_TOKEN (read-only Sanity token) and BACKUP_PASSPHRASE
+# (keep a copy in a password manager: without it the backups can't be read).
+# Restore: see "Backups" in the README.
 
 on:
   schedule:
@@ -31,12 +35,26 @@ jobs:
           SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
         run: npx sanity datasets export production "$RUNNER_TEMP/sanity-production.tar.gz" --overwrite
 
+      - name: Encrypt
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::error::BACKUP_PASSPHRASE secret is not set; refusing to publish an unencrypted backup."
+            exit 1
+          fi
+          printf '%s' "$BACKUP_PASSPHRASE" |
+            gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+              --symmetric --cipher-algo AES256 \
+              --output "$RUNNER_TEMP/sanity-production.tar.gz.gpg" "$RUNNER_TEMP/sanity-production.tar.gz"
+          rm "$RUNNER_TEMP/sanity-production.tar.gz"
+
       - name: Publish as a release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="backup-$(date -u +%Y-%m-%d)"
-          gh release create "$tag" "$RUNNER_TEMP/sanity-production.tar.gz" \
+          gh release create "$tag" "$RUNNER_TEMP/sanity-production.tar.gz.gpg" \
             --title "Sanity backup $(date -u +%Y-%m-%d)" \
-            --notes "Export of the production dataset. Restore with: npx sanity datasets import sanity-production.tar.gz production --replace" \
+            --notes "Encrypted export of the production dataset. To restore, see Backups in the README." \
             --latest=false
