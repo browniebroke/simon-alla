@@ -37,7 +37,8 @@
   // Declared here so `wrangler types` doesn't depend on a local .dev.vars.
   "secrets": {"required": ["TURNSTILE_SECRET_KEY"]},
   // Previews don't inherit production settings. They use Turnstile's public test keys
-  // and never send email: the contact form logs the message instead.
+  // and never send email: the contact form logs the message instead. Their
+  // TURNSTILE_SECRET_KEY (the test secret) is a Previews base secret, see README.
   "previews": {
     "send_email": [{"name": "EMAIL"}],
     "vars": {
@@ -47,7 +48,5 @@
       // Turnstile's test secret answers with this hostname.
       "TURNSTILE_HOSTNAMES": "example.com",
     },
-    // Set once with `wrangler preview base-config secret put` (test value, see README).
-    "secrets": {"required": ["TURNSTILE_SECRET_KEY"]},
   },
 }

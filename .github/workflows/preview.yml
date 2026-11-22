@@ -52,8 +52,15 @@ jobs:
           set -o pipefail
           npx wrangler preview --name "$PREVIEW_NAME" \
             --message "PR #${{ github.event.pull_request.number }} @ ${{ github.event.pull_request.head.sha }}" \
-            --json | tee "$RUNNER_TEMP/preview.json"
-          url=$(jq -er '.preview.urls[0]' "$RUNNER_TEMP/preview.json")
+            --json | tee "$RUNNER_TEMP/preview.log"
+          # Wrangler prints its usual output before the JSON: keep the last top-level object.
+          awk '/^\{$/ {buf = ""; f = 1} f {buf = buf $0 "\n"} END {printf "%s", buf}' \
+            "$RUNNER_TEMP/preview.log" > "$RUNNER_TEMP/preview.json"
+          url=$(jq -r '.preview.urls[0] // empty' "$RUNNER_TEMP/preview.json")
+          if [ -z "$url" ]; then
+            echo "::error::The Preview was deployed but has no URL. Is preview_urls enabled on the production Worker (set by the last wrangler deploy from main)?"
+            exit 1
+          fi
           echo "url=$url" >> "$GITHUB_OUTPUT"
 
       - name: Comment the preview URL
