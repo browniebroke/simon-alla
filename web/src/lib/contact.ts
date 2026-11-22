@@ -57,7 +57,7 @@ export function formatEmail(m: ContactMessage) {
     ['Nom', m.name],
     ['E-mail', m.email],
     ['Téléphone', m.phone],
-    ['Commune', m.town],
+    ['Lieu des travaux', m.town],
     ['Type de projet', m.projectType],
   ].filter((row): row is [string, string] => Boolean(row[1]))
 

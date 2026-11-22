@@ -20,8 +20,13 @@ const {services, privacyHref} = Astro.props
       <small class="error" data-for="name"></small>
     </label>
     <label>
-      <span>Commune</span>
-      <input name="town" autocomplete="address-level2" maxlength="100" />
+      <span>Lieu des travaux</span>
+      <input
+        name="town"
+        autocomplete="address-level2"
+        placeholder="Ville ou village"
+        maxlength="100"
+      />
     </label>
     <label>
       <span>E-mail</span>
