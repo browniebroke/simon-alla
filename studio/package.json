@@ -12,20 +12,20 @@
     "typecheck": "tsc --noEmit && sanity schemas validate"
   },
   "dependencies": {
-    "@sanity/icons": "^5.4.0",
-    "@sanity/locale-fr-fr": "^1.2.37",
-    "@sanity/vision": "^6.24.0",
+    "@sanity/icons": "5.4.0",
+    "@sanity/locale-fr-fr": "1.2.37",
+    "@sanity/vision": "6.24.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "sanity": "^6.24.0",
+    "sanity": "6.24.0",
     "styled-components": "^6.1.18"
   },
   "devDependencies": {
-    "@sanity/eslint-config-studio": "^7",
-    "@types/node": "^24.19.2",
+    "@sanity/eslint-config-studio": "7.0.0",
+    "@types/node": "24.19.2",
     "@types/react": "^19.2.14",
-    "eslint": "^10.8.1",
-    "prettier": "^3.5",
-    "typescript": "~6.0"
+    "eslint": "10.15.0",
+    "prettier": "3.10.1",
+    "typescript": "6.0.3"
   }
 }
