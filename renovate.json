@@ -1,6 +1,4 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "github>browniebroke/renovate-configs:js-app"
-  ]
+  "extends": ["github>browniebroke/renovate-configs:js-app"]
 }
