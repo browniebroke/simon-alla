@@ -21,12 +21,12 @@
   "observability": {
     "enabled": true,
   },
-  // Cloudflare Email Service: sends the contact form messages to Simon.
-  "send_email": [{"name": "EMAIL"}],
+  // Contact form messages go out through Email Routing on simonalla.fr. On the Workers Free
+  // plan this can only send to *verified* destination addresses (Email Routing in the
+  // Cloudflare dashboard), which is fine: the form only ever writes to Simon.
+  "send_email": [{"name": "EMAIL", "allowed_sender_addresses": ["site@simonalla.fr"]}],
   "vars": {
-    // Sender address: its domain must be onboarded with `wrangler email sending enable <domain>`.
-    // Leave empty until the domain is set up: the form then answers with an error.
-    "CONTACT_FROM_EMAIL": "",
+    "CONTACT_FROM_EMAIL": "site@simonalla.fr",
     "CONTACT_FROM_NAME": "Site L’atelier Pierre & Paysage",
     // "true" logs contact emails instead of sending them (set in .dev.vars for local dev).
     "EMAIL_DRY_RUN": "false",

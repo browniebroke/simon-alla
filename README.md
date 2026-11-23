@@ -61,7 +61,7 @@ npm run check    # format check + ESLint + type checks (astro check, tsc, Sanity
   - by hand, from the Actions tab.
 - **Pull request previews:** [`.github/workflows/preview.yml`](.github/workflows/preview.yml) deploys each PR from this repo as a Workers Preview at `pr-<number>-simon-alla.bruno-alla-s-account.workers.dev` (marked noindex by Cloudflare), comments the URL on the PR, and deletes the Preview when the PR closes. Previews use the `previews` block in `wrangler.jsonc`: Turnstile test keys and `EMAIL_DRY_RUN`, so the form works but never sends email. They show the published Sanity content, like production. PRs from forks and Dependabot are skipped (no access to secrets).
 - **Contact form settings:**
-  - `CONTACT_FROM_EMAIL` in `wrangler.jsonc`: sender address, on a domain onboarded with `npx wrangler email sending enable <domain>`.
+  - `CONTACT_FROM_EMAIL` in `wrangler.jsonc`: sender address on `simonalla.fr`. Sending goes through Email Routing, so the recipient must be a verified destination address in Cloudflare.
   - `TURNSTILE_SECRET_KEY`: secret, set with `npx wrangler secret put TURNSTILE_SECRET_KEY` (from `web/`).
   - `PUBLIC_TURNSTILE_SITE_KEY`: GitHub Actions repository **variable**, used at build time (defaults to Cloudflare's test key).
   - The recipient is the email set on the Contact page in Sanity, or the site email.
@@ -89,13 +89,9 @@ One-off steps done outside the repo. Tick them off as they're done.
 - [x] Zone `simonalla.fr` active on Cloudflare (waiting for the `.fr` registry to publish the nameservers)
 - [x] Custom domain `simonalla.fr` on the Worker
 - [x] `www.simonalla.fr` → `simonalla.fr`: proxied `www` AAAA record (`100::`) + Redirect Rule (301, keeps path and query); "Always Use HTTPS" on for `http://`
-- [ ] Contact form email (**on hold until Simon can access his inbox**). Cloudflare Email Sending needs Workers Paid, but sending to _verified_ addresses through Email Routing is free:
-  1. Dashboard → `simonalla.fr` → Email → Email Routing: enable it and accept the DNS records.
-  2. Add `simonalla9@gmail.com` as a destination address; Simon clicks the verification link in his inbox.
-  3. Optional: routing rule `contact@simonalla.fr` → `simonalla9@gmail.com`.
-  4. Then: set `CONTACT_FROM_EMAIL` to `site@simonalla.fr` and `allowed_sender_addresses` on the `send_email` binding in `web/wrangler.jsonc`, note in Studio that the recipient must be a verified address, deploy, send a real test through the form. If Cloudflare refuses to send from a routing-only domain, fall back to Resend's free plan or Workers Paid ($5/month).
-- [ ] Previews base secret: `printf '%s' 1x0000000000000000000000000000000AA | npx wrangler preview base-config secret put TURNSTILE_SECRET_KEY` (from `web/`; Cloudflare's public always-passing test secret)
-- [ ] Invite Simon to the Sanity project as an editor
+- [x] Contact form email: Email Routing on `simonalla.fr` (free; sends only to verified addresses), `simonalla9@gmail.com` verified as destination, sender `site@simonalla.fr` (`CONTACT_FROM_EMAIL` and `allowed_sender_addresses` in `web/wrangler.jsonc`)
+- [x] Previews base secret: `printf '%s' 1x0000000000000000000000000000000AA | npx wrangler preview base-config secret put TURNSTILE_SECRET_KEY` (from `web/`; Cloudflare's public always-passing test secret)
+- [x] Invite Simon to the Sanity project as an editor
 
 ### Sanity webhook → GitHub Actions
 

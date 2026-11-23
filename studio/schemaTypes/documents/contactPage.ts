@@ -18,7 +18,8 @@ export const contactPage = defineType({
     defineField({
       name: 'recipientEmail',
       title: 'E-mail qui reçoit les messages du formulaire',
-      description: 'Si vide, l’adresse des paramètres du site est utilisée.',
+      description:
+        'Si vide, l’adresse des paramètres du site est utilisée. Attention : l’adresse doit être vérifiée dans Cloudflare (Email Routing), sinon les messages ne seront pas envoyés.',
       type: 'string',
       validation: (rule) => rule.email().error('Adresse e-mail invalide.'),
     }),
