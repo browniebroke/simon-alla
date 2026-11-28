@@ -30,7 +30,7 @@
   "devDependencies": {
     "@astrojs/check": "0.9.12",
     "@eslint/js": "10.0.1",
-    "eslint": "10.15.0",
+    "eslint": "10.16.0",
     "eslint-plugin-astro": "3.2.2",
     "eslint-plugin-jsx-a11y-x": "0.2.0",
     "globals": "17.14.0",
